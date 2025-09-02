@@ -1,0 +1,15 @@
+# 가상환경 폴더
+venv/
+
+# 파이썬 캐시 파일
+__pycache__/
+*.pyc
+
+# 사용자가 업로드한 파일
+uploads/
+
+# 프로그램이 생성한 결과 파일
+generated/
+
+# macOS 시스템 파일
+.DS_Store

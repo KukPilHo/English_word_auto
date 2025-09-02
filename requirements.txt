@@ -1,0 +1,4 @@
+python-docx
+docxtpl
+Flask
+flask-cors
