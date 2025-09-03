@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, send_from_directory, jsonify
+from flask import Flask, request, send_from_directory, jsonify, render_template 
 from werkzeug.utils import secure_filename
 from word_processor import create_word_test
 from flask_cors import CORS # CORS 추가
@@ -25,7 +25,11 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # API 엔드포인트: 파일 업로드 및 처리
-@app.route('/upload', methods=['POST'])
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/upload', methods=['POST', 'OPTIONS'])
 def upload_file_api():
     if 'file' not in request.files:
         return jsonify({'error': '파일이 없습니다.'}), 400
