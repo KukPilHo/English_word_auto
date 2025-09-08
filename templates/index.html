@@ -5,118 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>누적 단어 시험지 생성기</title>
     <style>
-        /* 기본 폰트 및 배경 설정 */
+        /* CSS 스타일은 이전과 동일하게 유지됩니다. */
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
-        
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-        }
-
-        /* 메인 컨테이너 카드 스타일 */
-        .container {
-            background-color: #ffffff;
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-            transition: transform 0.2s ease-in-out;
-        }
-
-        .container:hover {
-            transform: translateY(-5px);
-        }
-
-        h1 {
-            font-weight: 700;
-            font-size: 28px;
-            color: #2c3e50;
-            margin-bottom: 15px;
-        }
-
-        p {
-            color: #555;
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-
-        /* 오류 메시지 스타일 */
-        .flash-error {
-            display: none; /* 평소에는 숨김 */
-            background-color: #ffebee;
-            color: #c62828;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid #ef9a9a;
-        }
-
-        /* 커스텀 파일 업로드 버튼 */
-        .file-upload-wrapper {
-            margin-bottom: 20px;
-        }
-
-        .file-upload-label {
-            display: inline-block;
-            padding: 12px 25px;
-            background-color: #3498db;
-            color: white;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background-color 0.3s;
-        }
-
-        .file-upload-label:hover {
-            background-color: #2980b9;
-        }
-
-        #file-upload {
-            display: none; /* 실제 input은 숨김 */
-        }
-
-        #file-name-display {
-            margin-top: 15px;
-            font-size: 14px;
-            color: #777;
-            height: 20px; /* 파일 이름이 없을 때도 공간 차지 */
-        }
-
-        /* 제출 버튼 스타일 */
-        .submit-btn {
-            width: 100%;
-            padding: 15px;
-            background-image: linear-gradient(45deg, #2980b9, #3498db);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
-        }
-
-        .submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
-        }
-
-        .submit-btn:disabled {
-            background-image: none;
-            background-color: #ccc;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
+        body{font-family:'Noto Sans KR',sans-serif;background-color:#f4f7f6;color:#333;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0}
+        .container{background-color:#fff;padding:40px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.1);max-width:500px;width:90%;text-align:center;transition:transform .2s ease-in-out}
+        .container:hover{transform:translateY(-5px)}
+        h1{font-weight:700;font-size:28px;color:#2c3e50;margin-bottom:15px}
+        p{color:#555;font-size:16px;line-height:1.6;margin-bottom:30px}
+        .flash-error{display:none;background-color:#ffebee;color:#c62828;padding:15px;border-radius:8px;margin-bottom:20px;border:1px solid #ef9a9a}
+        .file-upload-wrapper{margin-bottom:20px}
+        .file-upload-label{display:inline-block;padding:12px 25px;background-color:#3498db;color:#fff;border-radius:8px;cursor:pointer;font-weight:500;transition:background-color .3s}
+        .file-upload-label:hover{background-color:#2980b9}
+        #wordFile{display:none}
+        #file-name-display{margin-top:15px;font-size:14px;color:#777;height:20px}
+        .submit-btn{width:100%;padding:15px;background-image:linear-gradient(45deg,#2980b9,#3498db);color:#fff;border:none;border-radius:8px;font-size:18px;font-weight:700;cursor:pointer;transition:all .3s;box-shadow:0 4px 15px rgba(52,152,219,.4)}
+        .submit-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(52,152,219,.5)}
+        .submit-btn:disabled{background-image:none;background-color:#ccc;cursor:not-allowed;box-shadow:none}
     </style>
 </head>
 <body>
@@ -128,8 +32,8 @@
 
         <form id="upload-form">
             <div class="file-upload-wrapper">
-                <label for="file-upload" class="file-upload-label">파일 선택하기</label>
-                <input type="file" name="file" id="file-upload" accept=".docx">
+                <label for="wordFile" class="file-upload-label">단어 목록 파일 선택</label>
+                <input type="file" name="wordFile" id="wordFile" accept=".docx" style="display: none;">
             </div>
             <div id="file-name-display">파일을 선택해주세요.</div>
             <br>
@@ -139,49 +43,42 @@
 
     <script>
         const uploadForm = document.getElementById('upload-form');
-        const fileInput = document.getElementById('file-upload');
+        const wordFileInput = document.getElementById('wordFile');
         const fileNameDisplay = document.getElementById('file-name-display');
         const submitButton = document.getElementById('submit-button');
         const errorMessageDiv = document.getElementById('error-message');
 
-        fileInput.addEventListener('change', function() {
-            if (this.files && this.files.length > 0) {
-                fileNameDisplay.textContent = this.files[0].name;
-            } else {
-                fileNameDisplay.textContent = '파일을 선택해주세요.';
-            }
+        wordFileInput.addEventListener('change', function() {
+            fileNameDisplay.textContent = this.files.length > 0 ? this.files[0].name : '파일을 선택해주세요.';
         });
 
         uploadForm.addEventListener('submit', function(event) {
-            event.preventDefault(); // 기본 폼 제출 방지
+            event.preventDefault();
 
-            if (!fileInput.files || fileInput.files.length === 0) {
+            if (!wordFileInput.files[0]) {
                 showError('파일을 먼저 선택해주세요.');
                 return;
             }
 
             const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
+            formData.append('wordFile', wordFileInput.files[0]);
 
             submitButton.disabled = true;
             submitButton.textContent = '처리 중...';
             hideError();
 
-            // 백엔드와 프론트엔드가 같은 서버에 있으므로, 상대 경로로 요청합니다.
-            fetch('/upload', {
+            fetch('/generate', {
                 method: 'POST',
                 body: formData,
             })
             .then(response => {
                 if (!response.ok) {
-                     // 서버가 JSON 형식으로 오류를 보냈을 것으로 가정하고 파싱
                     return response.json().then(err => { throw new Error(err.error || '서버 응답 오류') });
                 }
                 return response.json();
             })
             .then(data => {
                 if (data.downloadUrl) {
-                    // 성공 시 다운로드 URL로 이동 (상대 경로이므로 바로 적용 가능)
                     window.location.href = data.downloadUrl;
                 } else {
                     throw new Error(data.error || '알 수 없는 오류');
