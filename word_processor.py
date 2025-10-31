@@ -141,6 +141,8 @@ def generate_tests_with_docxtpl(all_words_by_lesson, template_path, output_path)
             final_english_words = [pair[0] for pair in pairs_for_test]
             final_korean_translations = [pair[1] for pair in pairs_for_test]
 
+            random.shuffle(final_korean_translations)
+
             final_english_words += [""] * (50 - len(final_english_words))
             final_korean_translations += [""] * (50 - len(final_korean_translations))
             
