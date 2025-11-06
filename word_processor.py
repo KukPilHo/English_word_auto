@@ -1,4 +1,5 @@
 import random
+from typing import final
 from docx import Document
 from docxtpl import DocxTemplate
 import re
@@ -112,7 +113,8 @@ def parse_words_from_docx(doc_path):
 def generate_tests_with_docxtpl(all_words_by_lesson, template_path, output_path):
     """
     docxtpl 라이브러리를 사용하여 모든 누적 시험지와 정답지를 생성합니다.
-    (이 함수는 수정할 필요가 없습니다.)
+    (수정: 레슨당 3페이지 - 문제지, 영어답지, 한글답지)
+    (수정: 템플릿 조건부 렌더링을 사용하여 빈 표 숨기기)
     """
     try:
         doc = DocxTemplate(template_path)
@@ -120,12 +122,12 @@ def generate_tests_with_docxtpl(all_words_by_lesson, template_path, output_path)
         lessons_context = []
 
         for i in range(1, total_lessons + 1):
-            # 새로운 단어 선택 로직
+            # 1. 단어 선택 로직
             current_lesson_pairs = all_words_by_lesson.get(i, [])
             pairs_for_test = []
             if len(current_lesson_pairs) >= 50:
-                random.shuffle(current_lesson_pairs)
-                pairs_for_test = current_lesson_pairs[:50]
+                # 원본 보존: 제자리 섞기 대신 샘플링
+                pairs_for_test = random.sample(current_lesson_pairs, 50)
             else:
                 pairs_for_test.extend(current_lesson_pairs)
                 previous_pairs = []
@@ -136,21 +138,73 @@ def generate_tests_with_docxtpl(all_words_by_lesson, template_path, output_path)
                     random.shuffle(previous_pairs)
                     pairs_for_test.extend(previous_pairs[:num_needed])
             
-            random.shuffle(pairs_for_test)
-
-            final_english_words = [pair[0] for pair in pairs_for_test]
-            final_korean_translations = [pair[1] for pair in pairs_for_test]
-
+            # 2. 문제지 생성
+            problem_pairs = pairs_for_test.copy()
+            random.shuffle(problem_pairs)
+            
+            final_english_words = [pair[0] for pair in problem_pairs]
+            # 문제지 한글 표는 영어와 별도로 섞음
+            final_korean_translations = [pair[1] for pair in problem_pairs]
             random.shuffle(final_korean_translations)
-
+            
+            # 50행 패딩
             final_english_words += [""] * (50 - len(final_english_words))
             final_korean_translations += [""] * (50 - len(final_korean_translations))
             
+            # [PAGE 1] 문제지 페이지 (둘 다 보여줌)
             lessons_context.append({
                 'words': final_english_words,
-                'translations': final_korean_translations
+                'translations': final_korean_translations,
+                'show_words': True,
+                'show_translations': True
+            })
+            
+            # 3. 답지 생성
+            # 1) 영어 표 답안: 문제지 영어 표 순서(problem_pairs) 유지 + 각 칸에 “영어\n정답해석”
+            answer_english_words = []
+            for eng, kor in problem_pairs:
+                answer_english_words.append(f"{eng}\n{kor}")
+
+            # 2) 한글 표 답안: 문제지 한글 표 순서(final_korean_translations) 유지 + 각 칸에 “한글\n정답영어”
+            #    동일 번역(중복) 대비 위해 리스트 매핑 사용
+            kor_to_engs = {}
+            for eng, kor in pairs_for_test: # 매핑 테이블은 섞기 전 원본(pairs_for_test) 사용
+                kor_to_engs.setdefault(kor, []).append(eng)
+
+            answer_korean_translations = []
+            for kor in final_korean_translations[:50]:  # 패딩 전 실제 항목(문제지 한글표 순서)만 처리
+                if kor == "":
+                    answer_korean_translations.append("")
+                else:
+                    eng_list = kor_to_engs.get(kor, [])
+                    eng = eng_list.pop(0) if eng_list else ""
+                    answer_korean_translations.append(f"{kor}\n{eng}")
+
+            # 답지용 50행 패딩
+            answer_english_words += [""] * (50 - len(answer_english_words))
+            answer_korean_translations += [""] * (50 - len(answer_korean_translations))
+            
+            # 빈 테이블 데이터 생성 (템플릿이 데이터를 참조할 때 오류가 나지 않도록)
+            # (show_words: False일 때 'words'를, show_translations: False일 때 'translations'를 참조하므로)
+            blank_table = [""] * 50
+
+            # [PAGE 2] 답지 페이지 (영어) (영어만 보여줌)
+            lessons_context.append({
+                'words': answer_english_words,      # 영어 답안지 데이터
+                'translations': blank_table,        # 한글 (빈) 데이터
+                'show_words': True,                 # 영어 섹션: 보임
+                'show_translations': False          # 한글 섹션: 숨김
             })
 
+            # [PAGE 3] 답지 페이지 (한글) (한글만 보여줌)
+            lessons_context.append({
+                'words': blank_table,               # 영어 (빈) 데이터
+                'translations': answer_korean_translations, # 한글 답안지 데이터
+                'show_words': False,                # 영어 섹션: 숨김
+                'show_translations': True           # 한글 섹션: 보임
+            })
+
+        # 4. 렌더링
         context = {'lessons': lessons_context}
         doc.render(context)
         doc.save(output_path)
