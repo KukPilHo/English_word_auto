@@ -163,7 +163,7 @@ def generate_tests_with_docxtpl(all_words_by_lesson, template_path, output_path)
             # 1) 영어 표 답안: 문제지 영어 표 순서(problem_pairs) 유지 + 각 칸에 “영어\n정답해석”
             answer_english_words = []
             for eng, kor in problem_pairs:
-                answer_english_words.append(f"{eng}\n{kor}")
+                answer_english_words.append(f"{eng} {kor}")
 
             # 2) 한글 표 답안: 문제지 한글 표 순서(final_korean_translations) 유지 + 각 칸에 “한글\n정답영어”
             #    동일 번역(중복) 대비 위해 리스트 매핑 사용
@@ -178,7 +178,7 @@ def generate_tests_with_docxtpl(all_words_by_lesson, template_path, output_path)
                 else:
                     eng_list = kor_to_engs.get(kor, [])
                     eng = eng_list.pop(0) if eng_list else ""
-                    answer_korean_translations.append(f"{kor}\n{eng}")
+                    answer_korean_translations.append(f"{kor} {eng}")
 
             # 답지용 50행 패딩
             answer_english_words += [""] * (50 - len(answer_english_words))
