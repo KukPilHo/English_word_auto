@@ -151,21 +151,32 @@ def generate_tests_with_docxtpl(all_words_by_lesson, template_path, output_path)
             final_english_words += [""] * (50 - len(final_english_words))
             final_korean_translations += [""] * (50 - len(final_korean_translations))
             
-            # [PAGE 1] 문제지 페이지 (둘 다 보여줌)
+            # [PAGE 1] 문제지 페이지 (영어) (영어만 보여줌)
+            blank_table = [""] * 50  # 이 줄을 [PAGE 2] 이전에 미리 정의해두면 좋습니다.
+                                     # (이미 127줄 근처에 있다면 이 줄은 생략)
+            
             lessons_context.append({
-                'words': final_english_words,
-                'translations': final_korean_translations,
-                'show_words': True,
-                'show_translations': True
+                'lesson_number': i,
+                'words': final_english_words,       # 문제지 영어 단어
+                'translations': blank_table,        # 한글 (빈) 데이터
+                'show_words': True,                 # 영어 섹션: 보임
+                'show_translations': False          # 한글 섹션: 숨김
+            })
+
+            # [PAGE 2] 문제지 페이지 (한글) (한글만 보여줌)
+            lessons_context.append({
+                'lesson_number': i,
+                'words': blank_table,               # 영어 (빈) 데이터
+                'translations': final_korean_translations, # 문제지 한글 뜻
+                'show_words': False,                # 영어 섹션: 숨김
+                'show_translations': True           # 한글 섹션: 보임
             })
             
             # 3. 답지 생성
-            # 1) 영어 표 답안: 문제지 영어 표 순서(problem_pairs) 유지 + 각 칸에 “영어\n정답해석”
             answer_english_words = []
             for eng, kor in problem_pairs:
                 answer_english_words.append(f"{eng} {kor}")
 
-            # 2) 한글 표 답안: 문제지 한글 표 순서(final_korean_translations) 유지 + 각 칸에 “한글\n정답영어”
             #    동일 번역(중복) 대비 위해 리스트 매핑 사용
             kor_to_engs = {}
             for eng, kor in pairs_for_test: # 매핑 테이블은 섞기 전 원본(pairs_for_test) 사용
@@ -190,6 +201,7 @@ def generate_tests_with_docxtpl(all_words_by_lesson, template_path, output_path)
 
             # [PAGE 2] 답지 페이지 (영어) (영어만 보여줌)
             lessons_context.append({
+                'lesson_number': i,
                 'words': answer_english_words,      # 영어 답안지 데이터
                 'translations': blank_table,        # 한글 (빈) 데이터
                 'show_words': True,                 # 영어 섹션: 보임
@@ -198,6 +210,7 @@ def generate_tests_with_docxtpl(all_words_by_lesson, template_path, output_path)
 
             # [PAGE 3] 답지 페이지 (한글) (한글만 보여줌)
             lessons_context.append({
+                'lesson_number': i,
                 'words': blank_table,               # 영어 (빈) 데이터
                 'translations': answer_korean_translations, # 한글 답안지 데이터
                 'show_words': False,                # 영어 섹션: 숨김
