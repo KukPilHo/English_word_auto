@@ -39,7 +39,7 @@ def parse_words_from_docx(doc_path):
             trans_idx = None
 
             for row in table.rows:
-                cells = [cell.text.strip() for cell in row.cells]
+                cells = [cell.text.replace('\n', '').replace('\r', '').strip() for cell in row.cells] #cells = [cell.text.strip() for cell in row.cells]
                 if not cells:
                     continue
 
