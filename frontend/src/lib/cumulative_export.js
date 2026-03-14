@@ -19,8 +19,9 @@ function shuffle(array) {
  */
 export async function exportCumulativeTests(lessonsObj, filename) {
   // 1. 템플릿 파일 로드 (public/template.docx)
-  const response = await fetch('/template.docx');
-  if (!response.ok) throw new Error('템플릿 파일을 불러올 수 없습니다.');
+  const templateUrl = `${import.meta.env.BASE_URL}template.docx`;
+  const response = await fetch(templateUrl);
+  if (!response.ok) throw new Error(`템플릿 파일을 불러올 수 없습니다: ${templateUrl}`);
   const templateArrayBuffer = await response.arrayBuffer();
 
   // 2. 데이터 준비 (Python word_processor.py 로직 그대로)
