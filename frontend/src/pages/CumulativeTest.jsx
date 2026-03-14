@@ -11,7 +11,17 @@ export default function CumulativeTest() {
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      
+      // .doc 확장자 체크
+      if (selectedFile.name.toLowerCase().endsWith('.doc')) {
+        setError('구형 워드 파일(.doc)은 브라우저에서 분석할 수 없습니다. 워드에서 "다른 이름으로 저장"을 눌러 최신 파일 형식인 ".docx" 로 저장한 후 업로드해주세요.');
+        setFile(null);
+        setSuccess(false);
+        return;
+      }
+
+      setFile(selectedFile);
       setError('');
       setSuccess(false);
     }
@@ -56,7 +66,7 @@ export default function CumulativeTest() {
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">누적 단어 시험지 생성기</h1>
             <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full border border-purple-200">100% Frontend (No Server)</span>
         </div>
-        <p className="text-slate-500 mt-2 font-medium">단어 목록이 포함된 <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">.docx</code> 파일을 업로드하면 서버 없이 **브라우저상에서 즉시 시험지를 생성**합니다.</p>
+        <p className="text-slate-500 mt-2 font-medium">단어 목록이 포함된 <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">.docx</code> 파일을 업로드하면 서버 없이 **브라우저상에서 즉시 시험지를 생성**합니다. (구형 .doc 파일은 지원하지 않습니다)</p>
       </div>
 
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200/80">
