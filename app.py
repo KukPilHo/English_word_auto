@@ -15,7 +15,15 @@ os.makedirs(GENERATED_FOLDER, exist_ok=True)
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index.html', active_page='home')
+
+@app.route('/definition-matching')
+def definition_matching():
+    return render_template('definition_matching.html', active_page='definition_matching')
+
+@app.route('/blank-matching')
+def blank_matching():
+    return render_template('blank_matching.html', active_page='blank_matching')
 
 @app.route('/generate', methods=['POST'])
 def generate_workbook():

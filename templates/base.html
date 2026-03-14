@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}영어 학습 도구{% endblock %}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Noto Sans KR',sans-serif;background-color:#f4f7f6;color:#333;min-height:100vh;margin:0;padding-top:60px}
+
+        /* 네비게이션 */
+        .navbar{position:fixed;top:0;left:0;right:0;background-color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.08);z-index:1000;height:60px;display:flex;align-items:center;padding:0 30px}
+        .nav-brand{font-weight:700;font-size:20px;color:#2c3e50;text-decoration:none;margin-right:40px;white-space:nowrap}
+        .nav-menu{display:flex;align-items:center;list-style:none;gap:5px;height:100%}
+        .nav-item{position:relative;height:100%;display:flex;align-items:center}
+        .nav-link{text-decoration:none;color:#555;font-weight:500;font-size:15px;padding:8px 16px;border-radius:6px;transition:all .2s;white-space:nowrap}
+        .nav-link:hover{color:#3498db;background-color:#eef6fc}
+        .nav-link.active{color:#3498db;background-color:#eef6fc}
+
+        /* 드롭다운 */
+        .dropdown-toggle{cursor:pointer;display:flex;align-items:center;gap:5px}
+        .dropdown-toggle::after{content:'';display:inline-block;width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid #999;transition:transform .2s}
+        .nav-item:hover .dropdown-toggle::after{transform:rotate(180deg);border-top-color:#3498db}
+        .dropdown-menu{display:none;position:absolute;top:100%;left:0;background-color:#fff;border-radius:8px;box-shadow:0 8px 25px rgba(0,0,0,.12);min-width:220px;padding:8px 0;z-index:1001}
+        .nav-item:hover .dropdown-menu{display:block}
+        .dropdown-item{display:block;padding:10px 20px;color:#555;text-decoration:none;font-size:14px;font-weight:400;transition:all .2s;white-space:nowrap}
+        .dropdown-item:hover{background-color:#eef6fc;color:#3498db}
+        .dropdown-item.active{color:#3498db;background-color:#eef6fc}
+
+        /* 모바일 햄버거 */
+        .nav-toggle{display:none;background:none;border:none;cursor:pointer;padding:5px;margin-left:auto}
+        .nav-toggle span{display:block;width:22px;height:2px;background-color:#333;margin:5px 0;transition:all .3s}
+
+        /* 페이지 컨텐츠 */
+        .page-content{display:flex;justify-content:center;align-items:center;min-height:calc(100vh - 60px);padding:20px}
+
+        /* 공통 컨테이너 */
+        .container{background-color:#fff;padding:40px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.1);max-width:500px;width:90%;text-align:center;transition:transform .2s ease-in-out}
+        .container:hover{transform:translateY(-5px)}
+        h1{font-weight:700;font-size:28px;color:#2c3e50;margin-bottom:15px}
+        p.desc{color:#555;font-size:16px;line-height:1.6;margin-bottom:30px}
+        .flash-error{display:none;background-color:#ffebee;color:#c62828;padding:15px;border-radius:8px;margin-bottom:20px;border:1px solid #ef9a9a}
+        .file-upload-wrapper{margin-bottom:20px}
+        .file-upload-label{display:inline-block;padding:12px 25px;background-color:#3498db;color:#fff;border-radius:8px;cursor:pointer;font-weight:500;transition:background-color .3s}
+        .file-upload-label:hover{background-color:#2980b9}
+        .submit-btn{width:100%;padding:15px;background-image:linear-gradient(45deg,#2980b9,#3498db);color:#fff;border:none;border-radius:8px;font-size:18px;font-weight:700;cursor:pointer;transition:all .3s;box-shadow:0 4px 15px rgba(52,152,219,.4)}
+        .submit-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(52,152,219,.5)}
+        .submit-btn:disabled{background-image:none;background-color:#ccc;cursor:not-allowed;box-shadow:none;transform:none}
+
+        /* 모바일 반응형 */
+        @media(max-width:768px){
+            .nav-toggle{display:block}
+            .nav-menu{display:none;position:absolute;top:60px;left:0;right:0;background-color:#fff;flex-direction:column;padding:15px;box-shadow:0 8px 25px rgba(0,0,0,.12);gap:0;height:auto}
+            .nav-menu.open{display:flex}
+            .nav-item{height:auto}
+            .dropdown-menu{position:static;box-shadow:none;padding-left:15px;display:none}
+            .nav-item:hover .dropdown-menu{display:none}
+            .nav-item.mobile-open .dropdown-menu{display:block}
+            .nav-link,.dropdown-item{padding:12px 16px}
+        }
+
+        {% block extra_style %}{% endblock %}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="nav-brand">English Tools</a>
+        <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-menu" id="navMenu">
+            <li class="nav-item">
+                <a href="/" class="nav-link {% if active_page == 'home' %}active{% endif %}">누적 시험지</a>
+            </li>
+            <li class="nav-item">
+                <span class="nav-link dropdown-toggle">문제 생성기</span>
+                <div class="dropdown-menu">
+                    <a href="http://localhost:8501" class="dropdown-item">문제 생성기 열기 →</a>
+                </div>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="page-content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        // 모바일 메뉴 토글
+        const navToggle = document.getElementById('navToggle');
+        const navMenu = document.getElementById('navMenu');
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('open');
+        });
+
+        // 모바일 드롭다운 토글
+        document.querySelectorAll('.dropdown-toggle').forEach(toggle => {
+            toggle.addEventListener('click', (e) => {
+                if (window.innerWidth <= 768) {
+                    e.target.closest('.nav-item').classList.toggle('mobile-open');
+                }
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

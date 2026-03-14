@@ -3,3 +3,6 @@ docxtpl
 Flask
 flask-cors
 gunicorn
+streamlit
+openai
+python-dotenv

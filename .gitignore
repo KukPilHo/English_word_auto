@@ -11,5 +11,8 @@ uploads/
 # 프로그램이 생성한 결과 파일
 generated/
 
+# 환경 변수 (API 키 포함)
+.env
+
 # macOS 시스템 파일
 .DS_Store

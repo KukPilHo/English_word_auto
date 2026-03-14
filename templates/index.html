@@ -1,46 +1,32 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>누적 단어 시험지 생성기</title>
-    <style>
-        /* CSS 스타일은 이전과 동일하게 유지됩니다. */
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
-        body{font-family:'Noto Sans KR',sans-serif;background-color:#f4f7f6;color:#333;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0}
-        .container{background-color:#fff;padding:40px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.1);max-width:500px;width:90%;text-align:center;transition:transform .2s ease-in-out}
-        .container:hover{transform:translateY(-5px)}
-        h1{font-weight:700;font-size:28px;color:#2c3e50;margin-bottom:15px}
-        p{color:#555;font-size:16px;line-height:1.6;margin-bottom:30px}
-        .flash-error{display:none;background-color:#ffebee;color:#c62828;padding:15px;border-radius:8px;margin-bottom:20px;border:1px solid #ef9a9a}
-        .file-upload-wrapper{margin-bottom:20px}
-        .file-upload-label{display:inline-block;padding:12px 25px;background-color:#3498db;color:#fff;border-radius:8px;cursor:pointer;font-weight:500;transition:background-color .3s}
-        .file-upload-label:hover{background-color:#2980b9}
+{% extends "base.html" %}
+
+{% block title %}누적 단어 시험지 생성기{% endblock %}
+
+{% block extra_style %}
         #wordFile{display:none}
         #file-name-display{margin-top:15px;font-size:14px;color:#777;height:20px}
-        .submit-btn{width:100%;padding:15px;background-image:linear-gradient(45deg,#2980b9,#3498db);color:#fff;border:none;border-radius:8px;font-size:18px;font-weight:700;cursor:pointer;transition:all .3s;box-shadow:0 4px 15px rgba(52,152,219,.4)}
-        .submit-btn:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(52,152,219,.5)}
-        .submit-btn:disabled{background-image:none;background-color:#ccc;cursor:not-allowed;box-shadow:none}
-    </style>
-</head>
-<body>
+{% endblock %}
+
+{% block content %}
     <div class="container">
-        <h1>📝 누적 단어 시험지 생성기</h1>
-        <p>단어 목록이 포함된 '.docx' 파일을 업로드하여<br>누적 단어 시험지를 간편하게 만들어보세요.</p>
-        
+        <h1>누적 단어 시험지 생성기</h1>
+        <p class="desc">단어 목록이 포함된 '.docx' 파일을 업로드하여<br>누적 단어 시험지를 간편하게 만들어보세요.</p>
+
         <div class="flash-error" id="error-message"></div>
 
         <form id="upload-form">
             <div class="file-upload-wrapper">
                 <label for="wordFile" class="file-upload-label">단어 목록 파일 선택</label>
-                <input type="file" name="wordFile" id="wordFile" accept=".docx" style="display: none;">
+                <input type="file" name="wordFile" id="wordFile" accept=".docx">
             </div>
             <div id="file-name-display">파일을 선택해주세요.</div>
             <br>
             <button type="submit" class="submit-btn" id="submit-button">시험지 생성 및 다운로드</button>
         </form>
     </div>
+{% endblock %}
 
+{% block scripts %}
     <script>
         const uploadForm = document.getElementById('upload-form');
         const wordFileInput = document.getElementById('wordFile');
@@ -97,10 +83,9 @@
             errorMessageDiv.textContent = message;
             errorMessageDiv.style.display = 'block';
         }
-        
+
         function hideError() {
             errorMessageDiv.style.display = 'none';
         }
     </script>
-</body>
-</html>
+{% endblock %}
