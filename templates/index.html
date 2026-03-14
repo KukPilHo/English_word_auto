@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}누적 단어 시험지 생성기{% endblock %}
+
+{% block extra_style %}
+        #wordFile{display:none}
+        #file-name-display{margin-top:15px;font-size:14px;color:#777;height:20px}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <h1>누적 단어 시험지 생성기</h1>
+        <p class="desc">단어 목록이 포함된 '.docx' 파일을 업로드하여<br>누적 단어 시험지를 간편하게 만들어보세요.</p>
+
+        <div class="flash-error" id="error-message"></div>
+
+        <form id="upload-form">
+            <div class="file-upload-wrapper">
+                <label for="wordFile" class="file-upload-label">단어 목록 파일 선택</label>
+                <input type="file" name="wordFile" id="wordFile" accept=".docx">
+            </div>
+            <div id="file-name-display">파일을 선택해주세요.</div>
+            <br>
+            <button type="submit" class="submit-btn" id="submit-button">시험지 생성 및 다운로드</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        const uploadForm = document.getElementById('upload-form');
+        const wordFileInput = document.getElementById('wordFile');
+        const fileNameDisplay = document.getElementById('file-name-display');
+        const submitButton = document.getElementById('submit-button');
+        const errorMessageDiv = document.getElementById('error-message');
+
+        wordFileInput.addEventListener('change', function() {
+            fileNameDisplay.textContent = this.files.length > 0 ? this.files[0].name : '파일을 선택해주세요.';
+        });
+
+        uploadForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            if (!wordFileInput.files[0]) {
+                showError('파일을 먼저 선택해주세요.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('wordFile', wordFileInput.files[0]);
+
+            submitButton.disabled = true;
+            submitButton.textContent = '처리 중...';
+            hideError();
+
+            fetch('/generate', {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.error || '서버 응답 오류') });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.downloadUrl) {
+                    window.location.href = data.downloadUrl;
+                } else {
+                    throw new Error(data.error || '알 수 없는 오류');
+                }
+            })
+            .catch(error => {
+                showError(error.message);
+            })
+            .finally(() => {
+                submitButton.disabled = false;
+                submitButton.textContent = '시험지 생성 및 다운로드';
+            });
+        });
+
+        function showError(message) {
+            errorMessageDiv.textContent = message;
+            errorMessageDiv.style.display = 'block';
+        }
+
+        function hideError() {
+            errorMessageDiv.style.display = 'none';
+        }
+    </script>
+{% endblock %}
