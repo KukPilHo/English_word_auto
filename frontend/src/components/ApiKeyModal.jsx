@@ -41,17 +41,7 @@ export default function ApiKeyModal({ isOpen, onClose }) {
             <p className="text-xs text-slate-500 mt-2">이 키는 브라우저의 로컬 저장소에만 안전하게 보관됩니다.</p>
           </div>
 
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-1">LLM Model</label>
-            <select
-              value={tempModel}
-              onChange={e => setTempModel(e.target.value)}
-              className="w-full border outline-none focus:ring-2 focus:ring-blue-500/50 border-slate-200 rounded-xl px-4 py-3 text-sm bg-white"
-            >
-              <option value="gpt-5-mini">GPT-5 Mini (권장)</option>
-              <option value="gpt-4o">GPT-4o</option>
-            </select>
-          </div>
+
         </div>
 
         <div className="p-5 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">

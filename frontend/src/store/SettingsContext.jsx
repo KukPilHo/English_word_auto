@@ -4,15 +4,13 @@ const SettingsContext = createContext(null);
 
 export function SettingsProvider({ children }) {
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('openai_api_key') || '');
-  const [model, setModel] = useState(() => localStorage.getItem('llm_model') || 'gpt-5-mini');
+  const [model, setModel] = useState('gpt-4o-mini'); // 고정 모델
 
   useEffect(() => {
     localStorage.setItem('openai_api_key', apiKey);
   }, [apiKey]);
 
-  useEffect(() => {
-    localStorage.setItem('llm_model', model);
-  }, [model]);
+  // 모델은 로컬 스토리지 무시하고 항상 gpt-4o-mini를 쓰도록 함
 
   return (
     <SettingsContext.Provider value={{ apiKey, setApiKey, model, setModel }}>

@@ -12,7 +12,6 @@ export async function generateContent(apiKey, model, systemPrompt, userPrompt) {
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt }
     ],
-    temperature: 0.3,
     response_format: { type: "json_object" }
   };
 
@@ -65,7 +64,6 @@ export async function parseUnstructuredWords(apiKey, model, text, imageBase64) {
   const body = {
     model: useModel,
     messages: messages,
-    temperature: 0.1,
     response_format: { type: "json_object" }
   };
 
@@ -112,7 +110,6 @@ export async function parseUnstructuredPassage(apiKey, model, text, imageBase64)
     body: JSON.stringify({
       model: useModel,
       messages: messages,
-      temperature: 0.1,
       response_format: { type: "json_object" }
     })
   });
