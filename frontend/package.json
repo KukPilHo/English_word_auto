@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://pilho-kuk.github.io/English_word_auto",
+  "homepage": "https://KukPilHo.github.io/English_word_auto",
   "scripts": {
     "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
