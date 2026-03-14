@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { UploadCloud, FileDown, AlertCircle, Loader2 } from 'lucide-react';
+import { parseCumulativeWords } from '../lib/cumulative_logic';
+import { exportCumulativeTests } from '../lib/cumulative_export';
 
 export default function CumulativeTest() {
   const [file, setFile] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
-  const [downloadUrl, setDownloadUrl] = useState('');
+  const [success, setSuccess] = useState(false);
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       setFile(e.target.files[0]);
       setError('');
-      setDownloadUrl('');
+      setSuccess(false);
     }
   };
 
@@ -23,26 +25,24 @@ export default function CumulativeTest() {
     
     setIsGenerating(true);
     setError('');
-    setDownloadUrl('');
-
-    const formData = new FormData();
-    formData.append('wordFile', file);
+    setSuccess(false);
 
     try {
-      // 기존 Flask 백엔드 (app.py) 포트 5001 호출
-      const res = await fetch('http://localhost:5001/generate', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || '시험지 생성에 실패했습니다. (서버 연결을 확인하세요)');
+      // 1. Parse using mammoth on frontend
+      const lessonsObj = await parseCumulativeWords(file);
+      const totalLessons = Object.keys(lessonsObj).length;
+      
+      if (totalLessons === 0) {
+         throw new Error('파일에서 유효한 표 구조(단어 리스트)를 찾지 못했습니다.');
       }
 
-      const data = await res.json();
-      setDownloadUrl(`http://localhost:5001${data.downloadUrl}`);
+      // 2. Generate and download using docx
+      const originalName = file.name.replace(/\.[^/.]+$/, "");
+      await exportCumulativeTests(lessonsObj, `${originalName}_Answer.docx`);
+      
+      setSuccess(true);
     } catch (e) {
+      console.error(e);
       setError(e.message || '요청 중 오류가 발생했습니다.');
     } finally {
       setIsGenerating(false);
@@ -52,8 +52,11 @@ export default function CumulativeTest() {
   return (
     <div className="max-w-4xl mx-auto p-8 animate-in fade-in duration-500">
       <div className="mb-8">
-        <h1 className="text-3xl font-black text-slate-900 tracking-tight">누적 단어 시험지 생성기</h1>
-        <p className="text-slate-500 mt-2 font-medium">단어 목록이 포함된 <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">.docx</code> 파일을 업로드하면 기존 방식 그대로 누적 단어 시험지를 자동 생성합니다.</p>
+        <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-black text-slate-900 tracking-tight">누적 단어 시험지 생성기</h1>
+            <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-bold rounded-full border border-purple-200">100% Frontend (No Server)</span>
+        </div>
+        <p className="text-slate-500 mt-2 font-medium">단어 목록이 포함된 <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700">.docx</code> 파일을 업로드하면 서버 없이 **브라우저상에서 즉시 시험지를 생성**합니다.</p>
       </div>
 
       <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200/80">
@@ -73,7 +76,7 @@ export default function CumulativeTest() {
               />
             </label>
             {file && (
-              <p className="mt-4 text-sm font-bold text-blue-600">
+              <p className="mt-4 text-sm font-bold text-purple-600">
                 선택된 파일: {file.name}
               </p>
             )}
@@ -94,22 +97,15 @@ export default function CumulativeTest() {
           <button 
             onClick={handleGenerate}
             disabled={isGenerating || !file}
-            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white font-bold text-lg rounded-xl shadow-md hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg rounded-xl shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isGenerating ? <Loader2 className="w-5 h-5 animate-spin" /> : <FileDown className="w-5 h-5" />}
-            {isGenerating ? '시험지 생성 중 (서버 처리 중)...' : '시험지 생성 및 다운로드'}
+            {isGenerating ? '시험지 파일 생성 중 (초고속)...' : '시험지 생성 및 즉시 다운로드'}
           </button>
 
-          {downloadUrl && (
+          {success && (
             <div className="mt-6 p-6 bg-emerald-50 rounded-xl border border-emerald-100 flex flex-col items-center justify-center animate-in zoom-in-95 duration-300">
-               <p className="text-emerald-800 font-bold mb-4">✅ 시험지가 성공적으로 생성되었습니다!</p>
-               <a 
-                 href={downloadUrl} 
-                 className="px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl shadow-sm hover:bg-emerald-700 transition-colors flex items-center gap-2"
-               >
-                 <FileDown className="w-5 h-5" />
-                 다운로드 저장하기
-               </a>
+               <p className="text-emerald-800 font-bold">✅ 파일이 성공적으로 생성되어 다운로드 폴더에 저장되었습니다!</p>
             </div>
           )}
 

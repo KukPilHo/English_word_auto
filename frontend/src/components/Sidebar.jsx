@@ -5,7 +5,7 @@ import ApiKeyModal from './ApiKeyModal';
 import { Link, useLocation } from 'react-router-dom';
 
 const navItems = [
-  { name: '누적 시험지', path: '/cumulative', icon: Layers, desc: '.docx 파일 업로드' },
+  { name: '누적 시험지', path: '/cumulative', icon: Layers, desc: '100% 브라우저 기반' },
   { name: '빈칸 매칭 (문장생성)', path: '/', icon: CheckSquare, desc: 'AI 예문 자동 생성형' },
   { name: '영영풀이 (지문기반)', path: '/passage', icon: FileText, desc: '입력된 지문 기반' },
 ];
