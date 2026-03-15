@@ -6,6 +6,8 @@ import { generateTypeAQuestions } from '../lib/question_logic';
 import { parseUnstructuredPassage } from '../lib/llm_api';
 import { exportToDocx } from '../lib/docx_export';
 import { Bot, FileDown, AlertCircle, RefreshCw, FileText, BarChart, UploadCloud, X, Sparkles } from 'lucide-react';
+import QuestionTypeSelector from '../components/QuestionTypeSelector';
+import { PASSAGE_TYPES } from '../lib/questionTypes';
 
 const DEFAULT_PASSAGES = `[지문 1]
 Do you want to make healthy ramyeon? This is my recipe. First, boil water and put in
@@ -19,7 +21,7 @@ Last summer, I visited the capital city of France. The weather was perfect, and 
 
 export default function TypeA_Passage() {
   const { typeAState, setTypeAState } = useAppState();
-  const { rawText, parsedWords, passagesText, passageImage, questions, difficulty } = typeAState;
+  const { rawText, parsedWords, passagesText, passageImage, questions, difficulty, typeCounts } = typeAState;
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [isParsingPassage, setIsParsingPassage] = useState(false);
@@ -48,6 +50,11 @@ export default function TypeA_Passage() {
     updateState({ questions: [] });
     
     try {
+      const totalCount = Object.values(typeCounts).reduce((a, b) => a + b, 0);
+      if (totalCount === 0) {
+        setError('최소 1개 이상의 유형을 선택해주세요.');
+        return;
+      }
       const generated = await generateTypeAQuestions(apiKey, model, parsedWords, passagesList, difficulty);
       
       const numbered = generated.map((q, i) => ({ ...q, number: i + 1, type: 'TypeA' }));
@@ -212,6 +219,12 @@ export default function TypeA_Passage() {
                     </div>
                   </div>
                </div>
+
+               <QuestionTypeSelector 
+                  types={PASSAGE_TYPES}
+                  typeCounts={typeCounts}
+                  onTypeCountsChange={(newCounts) => updateState({ typeCounts: newCounts })}
+               />
                
                <button 
                   onClick={handleGenerate}

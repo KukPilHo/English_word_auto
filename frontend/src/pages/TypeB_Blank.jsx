@@ -5,10 +5,12 @@ import { useAppState } from '../store/AppContext';
 import { generateTypeBQuestions } from '../lib/question_logic';
 import { exportToDocx } from '../lib/docx_export';
 import { Bot, FileDown, AlertCircle, RefreshCw, BarChart } from 'lucide-react';
+import QuestionTypeSelector from '../components/QuestionTypeSelector';
+import { VOCAB_TYPES } from '../lib/questionTypes';
 
 export default function TypeB_Blank() {
   const { typeBState, setTypeBState } = useAppState();
-  const { rawText, parsedWords, questions, difficulty } = typeBState;
+  const { rawText, parsedWords, questions, difficulty, typeCounts } = typeBState;
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
@@ -30,7 +32,12 @@ export default function TypeB_Blank() {
     updateState({ questions: [] });
     
     try {
-      const generated = await generateTypeBQuestions(apiKey, model, parsedWords, 1, difficulty); // 1문항 생성 고정
+      const totalCount = Object.values(typeCounts).reduce((a, b) => a + b, 0);
+      if (totalCount === 0) {
+        setError('최소 1개 이상의 유형을 선택해주세요.');
+        return;
+      }
+      const generated = await generateTypeBQuestions(apiKey, model, parsedWords, typeCounts['blank_matching'] || 1, difficulty);
       
       const numbered = generated.map((q, i) => ({ ...q, number: i + 1, type: 'TypeB' }));
       updateState({ questions: numbered });
@@ -92,6 +99,12 @@ export default function TypeB_Blank() {
                     </div>
                   </div>
                </div>
+
+               <QuestionTypeSelector 
+                  types={VOCAB_TYPES}
+                  typeCounts={typeCounts}
+                  onTypeCountsChange={(newCounts) => updateState({ typeCounts: newCounts })}
+               />
                
                <button 
                   onClick={handleGenerate}

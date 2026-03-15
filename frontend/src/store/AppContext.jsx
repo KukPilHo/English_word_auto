@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from 'react';
+import { VOCAB_TYPES, PASSAGE_TYPES, getDefaultTypeCounts } from '../lib/questionTypes';
 
 const DEFAULT_EXAMPLE = `아래와 같이 자유롭게 영어 단어와 풀이를 입력하거나, 단어장 이미지를 캡처 후 붙여넣어(Ctrl+V) [AI 분석 시작]을 눌러보세요.
 
@@ -36,7 +37,8 @@ export function AppProvider({ children }) {
     rawText: DEFAULT_EXAMPLE,
     parsedWords: [],
     questions: [],
-    difficulty: '고1 수준'
+    difficulty: '고1 수준',
+    typeCounts: getDefaultTypeCounts(VOCAB_TYPES),
   });
 
   // Type A State
@@ -46,7 +48,8 @@ export function AppProvider({ children }) {
     passagesText: DEFAULT_PASSAGES,
     passageImage: null,
     questions: [],
-    difficulty: '고1 수준'
+    difficulty: '고1 수준',
+    typeCounts: getDefaultTypeCounts(PASSAGE_TYPES),
   });
 
   return (
