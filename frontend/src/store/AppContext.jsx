@@ -39,6 +39,7 @@ export function AppProvider({ children }) {
     questions: [],
     difficulty: '고1 수준',
     typeCounts: getDefaultTypeCounts(VOCAB_TYPES),
+    generationProgress: null, // { phase, completedTypes, totalTypes, currentType }
   });
 
   // Type A State

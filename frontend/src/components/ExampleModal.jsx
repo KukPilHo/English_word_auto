@@ -2,7 +2,7 @@ import { X, Eye } from 'lucide-react';
 
 /**
  * 유형별 예시 문항을 보여주는 모달
- * type.example이 null이면 "준비 중" 안내를 표시합니다.
+ * type.example 텍스트 또는 type.exampleImage 이미지를 표시합니다.
  */
 export default function ExampleModal({ type, onClose }) {
   if (!type) return null;
@@ -10,7 +10,7 @@ export default function ExampleModal({ type, onClose }) {
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={onClose}>
       <div 
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] overflow-hidden flex flex-col"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col"
         onClick={e => e.stopPropagation()}
       >
         {/* Header */}
@@ -31,9 +31,26 @@ export default function ExampleModal({ type, onClose }) {
 
         {/* Body */}
         <div className="p-6 overflow-y-auto flex-1">
+          {/* 이미지 예시 */}
+          {type.exampleImage && (
+            <div className="mb-5">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">실제 시험 예시</p>
+              <div className="bg-white border border-slate-200 rounded-xl p-3 flex justify-center">
+                <img 
+                  src={type.exampleImage} 
+                  alt={`${type.name} 예시`} 
+                  className="max-w-full h-auto rounded-lg"
+                  style={{ maxHeight: '280px' }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* 텍스트 예시 */}
           {type.example ? (
-            <div className="prose prose-sm max-w-none">
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed">
+            <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">문제 형식 미리보기</p>
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-5 text-sm text-slate-700 whitespace-pre-wrap leading-relaxed font-mono">
                 {type.example}
               </div>
             </div>
