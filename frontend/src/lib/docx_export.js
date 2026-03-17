@@ -186,6 +186,45 @@ function renderTypeA(q) {
 }
 
 /* ────────────────────────────────────
+   Reading OX: 지문 일치/불일치
+   ──────────────────────────────────── */
+
+function renderReadingOX(q) {
+  const elements = [];
+
+  elements.push(createInstructionHeader(q.number, q.instruction));
+
+  // 지문 박스
+  const lines = (q.passage || '').split('\n');
+  const passageParas = lines.map(line => new Paragraph({
+    children: [new TextRun({ text: line, size: 22 })],
+    spacing: { after: 60 }
+  }));
+  elements.push(createBoxedContent(passageParas));
+  elements.push(new Paragraph({ spacing: { after: 200 } }));
+
+  // O/X 진술문 (보기)
+  const header = new Paragraph({ children: [new TextRun({ text: "<보기>", size: 22 })], spacing: { after: 100 } });
+  const statementParas = (q.statements || []).map(s =>
+    new Paragraph({
+      children: [new TextRun({ text: `${s.label} ${s.text}`, size: 22 })],
+      spacing: { after: 80 }
+    })
+  );
+  elements.push(createBoxedContent([header, ...statementParas]));
+  elements.push(new Paragraph({ spacing: { after: 200 } }));
+
+  // 선택지 (O/X 배열)
+  const choicesText = (q.choices || []).map(c => `${c.number}  ${c.combination.join('   ')}`).join('      ');
+  elements.push(new Paragraph({
+    children: [new TextRun({ text: choicesText, size: 22 })],
+    spacing: { after: 400 }
+  }));
+
+  return elements;
+}
+
+/* ────────────────────────────────────
    메인 내보내기 함수
    ──────────────────────────────────── */
 
@@ -202,6 +241,9 @@ export async function exportToDocx(questions, filename) {
         break;
       case 'single_blank':
         docElements.push(...renderType3(q));
+        break;
+      case 'reading_ox':
+        docElements.push(...renderReadingOX(q));
         break;
       default:
         // 기존 TypeA/TypeB 호환

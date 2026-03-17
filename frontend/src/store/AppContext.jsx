@@ -4,20 +4,20 @@ import { VOCAB_TYPES, PASSAGE_TYPES, getDefaultTypeCounts } from '../lib/questio
 const DEFAULT_EXAMPLE = `아래와 같이 자유롭게 영어 단어와 풀이를 입력하거나, 단어장 이미지를 캡처 후 붙여넣어(Ctrl+V) [AI 분석 시작]을 눌러보세요.
 
 apologize: to tell someone that you are sorry
-arrival (도착): the act of arriving somewhere
-capital
-casual - not formal
-communicate
-correctly`;
-
-const DEFAULT_PARSED_WORDS = [
-  { id: 1, word: 'apologize', meaning_en: 'to tell someone that you are sorry' },
-  { id: 2, word: 'arrival', meaning_en: 'the act of arriving somewhere' },
-  { id: 3, word: 'capital', meaning_en: 'an important city that is the center of government of a country' },
-  { id: 4, word: 'casual', meaning_en: 'not formal or not for a formal situation' },
-  { id: 5, word: 'communicate', meaning_en: 'to share information with others by speaking, writing, moving your body, etc.' },
-  { id: 6, word: 'correctly', meaning_en: 'in a way that is right or true' }
-];
+arrival: the act of arriving somewhere
+capital: an important city that is the center of government of a country
+casual: not formal or not for a formal situation
+communicate: to share information with others by speaking, writing, moving your body, etc.
+correctly: in a way that is right or true
+courage: the ability to do something that you know is difficult or dangerous
+damage: physical harm that makes something less useful or valuable
+encourage: to give someone hope, confidence, or support
+exchange: to give something and receive something of the same kind in return
+familiar: well known to you, or easy to recognize
+generous: willing to give money, help, or time freely
+identify: to recognize or be able to name someone or something
+imagine: to form a picture in your mind of what something could be like
+journey: an act of traveling from one place to another`;
 
 const DEFAULT_PASSAGES = `[지문 1]
 Do you want to make healthy ramyeon? This is my recipe. First, boil water and put in
@@ -29,20 +29,24 @@ secret. Put some milk and cheese. It looks tasty, doesn't it?
 [지문 2]
 Last summer, I visited the capital city of France. The weather was perfect, and the people were friendly. I recommend everyone to visit Paris once in their life.`;
 
+const DEFAULT_READING_PASSAGE = `Last summer, my father suggested a surprising event: a family trip without smartphones! He said, "I hate to see you sitting together and only looking at your smartphones." My sister and I explained the need for smartphones, but he kept saying that we could not fully enjoy the trip with them. So we started a technology-free trip to a new city, Barcelona, Spain.
+
+Our first day was terrible. On the way to our guesthouse around Plaza Reial, we got lost in downtown Barcelona. Dad was busy looking at the map and asking for directions with a few Spanish words he got from a tour guidebook. Even though our guesthouse was right next to the Plaza, it took us about two hours to get there. We were so tired that we could not go out for dinner.`;
+
 const AppContext = createContext(null);
 
 export function AppProvider({ children }) {
-  // Type B State
+  // Type B State (단어 기반)
   const [typeBState, setTypeBState] = useState({
     rawText: DEFAULT_EXAMPLE,
     parsedWords: [],
     questions: [],
     difficulty: '고1 수준',
     typeCounts: getDefaultTypeCounts(VOCAB_TYPES),
-    generationProgress: null, // { phase, completedTypes, totalTypes, currentType }
+    generationProgress: null,
   });
 
-  // Type A State
+  // Type A State (지문 기반 영영풀이)
   const [typeAState, setTypeAState] = useState({
     rawText: DEFAULT_EXAMPLE,
     parsedWords: [],
@@ -53,10 +57,20 @@ export function AppProvider({ children }) {
     typeCounts: getDefaultTypeCounts(PASSAGE_TYPES),
   });
 
+  // Reading O/X State (지문 일치/불일치)
+  const [readingOXState, setReadingOXState] = useState({
+    passageText: DEFAULT_READING_PASSAGE,
+    questions: [],
+    difficulty: '고1 수준',
+    questionCount: 1,
+    generationProgress: null,
+  });
+
   return (
     <AppContext.Provider value={{
       typeBState, setTypeBState,
-      typeAState, setTypeAState
+      typeAState, setTypeAState,
+      readingOXState, setReadingOXState,
     }}>
       {children}
     </AppContext.Provider>

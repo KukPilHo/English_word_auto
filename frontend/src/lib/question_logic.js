@@ -151,35 +151,51 @@ export async function generateType2Questions(apiKey, model, words, count, diffic
 주어진 단어와 영영풀이를 바탕으로, 빈칸 영영풀이 매칭 문제를 출제해.
 목표 난이도는 [${difficulty}] 수준이다.
 
-## 규칙 (핵심)
+## 규칙 (핵심 - 반드시 지켜라)
 1. 모든 영영풀이는 내가 준 원본에서 한 글자도 바꾸지 말고 그대로 써라.
-2. 각 문제는 4개의 예문 (A)~(D)와 6개의 영영풀이 보기 ㉠~㉥를 가진다.
-3. 예문 길이는 8~15단어 수준으로 자연스럽고 명확해야 한다. 주어를 다양하게(I, She, The man 등) 사용하라.
-4. 예문의 어휘와 문장 구조는 반드시 지정된 난이도(${difficulty})에 맞게 적절히 조절하라.
-5. 선택지 ①~⑤는 (A) (B) (C) (D)에 들어갈 보기의 조합이다. 정답은 1개뿐이다.
-6. 각 문제에서 사용하는 단어들이 최대한 중복되지 않도록 다양한 단어를 사용하라.
+2. 각 문제는 반드시 정확히 4개의 예문 (A), (B), (C), (D)를 포함해야 한다. 절대로 1~3개만 만들지 마라.
+3. 각 문제는 반드시 정확히 6개의 영영풀이 보기 ㉠, ㉡, ㉢, ㉣, ㉤, ㉥를 포함해야 한다. (4개의 정답 + 2개의 오답)
+4. 예문 길이는 8~15단어 수준으로 자연스럽고 명확해야 한다. 주어를 다양하게(I, She, The man 등) 사용하라.
+5. 예문의 어휘와 문장 구조는 반드시 지정된 난이도(${difficulty})에 맞게 적절히 조절하라.
+6. 선택지는 반드시 5개 ①~⑤이며, 각 선택지는 (A)(B)(C)(D)에 들어갈 보기 ㉠~㉥의 조합이다. 정답은 1개뿐이다.
+7. 각 문제에서 사용하는 단어들이 최대한 중복되지 않도록 다양한 단어를 사용하라.
 
-## 출력 포맷 (오직 JSON만 출력)
+## 출력 포맷 (오직 JSON만 출력) — sentences는 반드시 4개, options는 반드시 6개
 {
   "questions": [
     {
       "number": 1,
       "instruction": "빈칸에 들어갈 단어의 영영 풀이를 <보기>에서 순서대로 바르게 짝지은 것은?",
       "sentences": [
-        {"label": "(A)", "text": "How long can you (A) on one leg?", "answer_word": "stand"}
+        {"label": "(A)", "text": "How long can you (A) on one leg?", "answer_word": "stand"},
+        {"label": "(B)", "text": "May I (B) a white wine with this dish?", "answer_word": "suggest"},
+        {"label": "(C)", "text": "The answer might (C) unclear after the meeting.", "answer_word": "remain"},
+        {"label": "(D)", "text": "She will (D) him with a cake for his birthday.", "answer_word": "surprise"}
       ],
       "options": [
-        {"label": "㉠", "definition": "to change from a solid to a liquid...", "source_word": "melt"}
+        {"label": "㉠", "definition": "to change from a solid to a liquid by applying heat", "source_word": "melt"},
+        {"label": "㉡", "definition": "to tell someone your ideas about what they should do", "source_word": "suggest"},
+        {"label": "㉢", "definition": "to be in a steady position without falling to one side", "source_word": "stand"},
+        {"label": "㉣", "definition": "to continue to exist or be left after others have gone", "source_word": "remain"},
+        {"label": "㉤", "definition": "to cause someone to feel mild astonishment or shock", "source_word": "surprise"},
+        {"label": "㉥", "definition": "to put it in a position where other people can see", "source_word": "display"}
       ],
       "choices": [
-        {"number": "①", "mapping": {"(A)": "㉢", "(B)": "㉡", "(C)": "㉣", "(D)": "㉤"}}
+        {"number": "①", "mapping": {"(A)": "㉢", "(B)": "㉣", "(C)": "㉡", "(D)": "㉥"}},
+        {"number": "②", "mapping": {"(A)": "㉡", "(B)": "㉢", "(C)": "㉥", "(D)": "㉣"}},
+        {"number": "③", "mapping": {"(A)": "㉢", "(B)": "㉡", "(C)": "㉣", "(D)": "㉤"}},
+        {"number": "④", "mapping": {"(A)": "㉢", "(B)": "㉥", "(C)": "㉡", "(D)": "㉤"}},
+        {"number": "⑤", "mapping": {"(A)": "㉥", "(B)": "㉠", "(C)": "㉤", "(D)": "㉢"}}
       ],
       "answer": "③"
     }
   ]
 }`;
 
-  const userPrompt = `생성 요구 개수: ${count}문제\n
+  const userPrompt = `생성 요구 개수: ${count}문제
+
+⚠️ 중요: 각 문제마다 반드시 sentences 4개, options 6개, choices 5개를 포함해야 합니다.
+
 단어 목록 (단어|영영풀이):
 ${words.map(w => `${w.word} | ${w.meaning_en}`).join('\n')}`;
 
@@ -369,4 +385,67 @@ ${words.map(w => `${w.word} | ${w.meaning_en}`).join('\n')}`;
 
   const res = await generateContent(apiKey, model, systemPrompt, userPrompt);
   return res.questions || [];
+}
+
+/* ────────────────────────────────────────────────
+   Reading O/X: 지문 일치/불일치 문제
+   - 지문을 읽고 5개 보기의 O/X 조합을 고르는 5지선다
+   ──────────────────────────────────────────────── */
+
+export async function generateReadingOXQuestions(apiKey, model, passage, count, difficulty) {
+  if (!passage || passage.trim().length < 30) {
+    throw new Error('지문이 너무 짧습니다. 최소 30자 이상의 영어 지문을 입력해주세요.');
+  }
+
+  const systemPrompt = `너는 한국 중고등학교 영어 시험 문제 출제 전문가야.
+주어진 영어 지문을 바탕으로, 일치/불일치(O/X) 문제를 출제해.
+목표 난이도는 [${difficulty}] 수준이다.
+
+## 규칙 (핵심)
+1. 지문의 내용을 바탕으로 5개의 보기 문장(진술문)을 만들어라.
+2. 각 보기 문장은 지문의 내용과 일치하면 O, 불일치하면 X로 판정된다.
+3. 보기 문장은 지문을 그대로 베끼지 말고 패러프레이즈하라. 학생이 내용을 제대로 이해했는지 확인할 수 있어야 한다.
+4. 5개 보기 중 O와 X가 적절히 섞이도록 하라 (전부 O이거나 전부 X이면 안 된다).
+5. 선택지 ①~⑤는 5개 보기에 대한 O/X 조합이다. 정답 조합은 1개뿐이다.
+6. 각 문제에서 보기 문장의 난이도는 ${difficulty} 수준에 맞춰라.
+7. 빈칸이 들어간 보기는 만들지 마라. 모든 보기 문장은 완전한 문장이어야 한다.
+
+## 출력 포맷 (오직 JSON만 출력)
+{
+  "questions": [
+    {
+      "number": 1,
+      "instruction": "<보기>의 ㉠~㉤이 윗글의 내용과 일치하면 O, 다르면 X라고 표시할 때 순서대로 OX를 배열한 것은?",
+      "passage": "지문 전체를 여기에 그대로 복사",
+      "statements": [
+        {"label": "㉠", "text": "The family's trip to Barcelona went easily without any problems.", "correct_ox": "X"},
+        {"label": "㉡", "text": "The family members were satisfied with their first day of the trip.", "correct_ox": "X"},
+        {"label": "㉢", "text": "The father was against using smartphones during the trip.", "correct_ox": "O"},
+        {"label": "㉣", "text": "Although the family members were tired from getting lost, they decided to go out for dinner.", "correct_ox": "X"},
+        {"label": "㉤", "text": "The father suggested the idea of a trip without smartphones because he wanted to learn a new language.", "correct_ox": "X"}
+      ],
+      "choices": [
+        {"number": "①", "combination": ["O", "X", "O", "X", "O"], "is_correct": false},
+        {"number": "②", "combination": ["O", "X", "X", "O", "X"], "is_correct": false},
+        {"number": "③", "combination": ["X", "O", "O", "X", "X"], "is_correct": false},
+        {"number": "④", "combination": ["X", "X", "O", "X", "X"], "is_correct": true},
+        {"number": "⑤", "combination": ["X", "X", "O", "X", "O"], "is_correct": false}
+      ],
+      "answer": "④"
+    }
+  ]
+}`;
+
+  const userPrompt = `생성 요구 개수: ${count}문제
+
+영어 지문:
+${passage}`;
+
+  const res = await generateContent(apiKey, model, systemPrompt, userPrompt);
+  const questions = (res.questions || []).map(q => ({
+    ...q,
+    typeId: 'reading_ox',
+    type: 'ReadingOX',
+  }));
+  return questions;
 }
