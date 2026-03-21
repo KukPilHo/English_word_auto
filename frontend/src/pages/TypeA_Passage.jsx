@@ -7,7 +7,7 @@ import { parseUnstructuredPassage } from '../lib/llm_api';
 import { exportToDocx } from '../lib/docx_export';
 import { Bot, FileDown, AlertCircle, RefreshCw, FileText, BarChart, UploadCloud, X, Sparkles } from 'lucide-react';
 import QuestionTypeSelector from '../components/QuestionTypeSelector';
-import { PASSAGE_TYPES } from '../lib/questionTypes';
+import { PASSAGE_TYPES, DIFFICULTY_LEVELS } from '../lib/questionTypes';
 
 const DEFAULT_PASSAGES = `[지문 1]
 Do you want to make healthy ramyeon? This is my recipe. First, boil water and put in
@@ -211,10 +211,9 @@ export default function TypeA_Passage() {
                         value={difficulty}
                         onChange={(e) => updateState({ difficulty: e.target.value })}
                       >
-                        <option value="중등 수준">중등 수준</option>
-                        <option value="고1 수준">고1 수준</option>
-                        <option value="고2 수준">고2 수준</option>
-                        <option value="고3 수준">고3 수준</option>
+                        {DIFFICULTY_LEVELS.map(level => (
+                          <option key={level.label} value={level.value}>{level.label}</option>
+                        ))}
                       </select>
                     </div>
                   </div>

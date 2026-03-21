@@ -6,7 +6,7 @@ import { generateAllQuestions } from '../lib/question_logic';
 import { exportToDocx } from '../lib/docx_export';
 import { Bot, FileDown, AlertCircle, RefreshCw, BarChart, CheckCircle2, Loader2 } from 'lucide-react';
 import QuestionTypeSelector from '../components/QuestionTypeSelector';
-import { VOCAB_TYPES, getTypeById } from '../lib/questionTypes';
+import { VOCAB_TYPES, getTypeById, DIFFICULTY_LEVELS } from '../lib/questionTypes';
 
 export default function TypeB_Blank() {
   const { typeBState, setTypeBState } = useAppState();
@@ -105,10 +105,9 @@ export default function TypeB_Blank() {
                          value={difficulty}
                          onChange={(e) => updateState({ difficulty: e.target.value })}
                        >
-                         <option value="중등 수준">중등 수준</option>
-                         <option value="고1 수준">고1 수준</option>
-                         <option value="고2 수준">고2 수준</option>
-                         <option value="고3 수준">고3 수준</option>
+                         {DIFFICULTY_LEVELS.map(level => (
+                           <option key={level.label} value={level.value}>{level.label}</option>
+                         ))}
                        </select>
                      </div>
                    </div>

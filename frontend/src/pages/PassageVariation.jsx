@@ -4,6 +4,7 @@ import { useAppState } from '../store/AppContext';
 import { extractFromImage, generatePassageVariation } from '../lib/variation_logic';
 import { exportToDocx } from '../lib/docx_export'; // Assuming this exists, might need custom implementation if structure differs
 import { Bot, FileDown, AlertCircle, RefreshCw, UploadCloud, X, ArrowRight } from 'lucide-react';
+import { DIFFICULTY_LEVELS } from '../lib/questionTypes';
 
 export default function PassageVariation() {
   const { variationState, setVariationState } = useAppState();
@@ -177,10 +178,9 @@ export default function PassageVariation() {
                   value={difficulty}
                   onChange={(e) => updateState({ difficulty: e.target.value })}
                 >
-                  <option value="중등 수준">중등 수준</option>
-                  <option value="고1 수준">고1 수준</option>
-                  <option value="고2 수준">고2 수준</option>
-                  <option value="고3 수준">고3 수준</option>
+                  {DIFFICULTY_LEVELS.map(level => (
+                    <option key={level.label} value={level.value}>{level.label}</option>
+                  ))}
                 </select>
                 <button 
                   onClick={onTransform}
