@@ -66,11 +66,22 @@ export function AppProvider({ children }) {
     generationProgress: null,
   });
 
+  // Variation State (다풀백 지문 변형)
+  const [variationState, setVariationState] = useState({
+    sourceImage: null,
+    extractedOriginal: '',
+    extractedQuestion: '',
+    extractedOptions: '',
+    transformedPassage: '',
+    difficulty: '고1 수준',
+  });
+
   return (
     <AppContext.Provider value={{
       typeBState, setTypeBState,
       typeAState, setTypeAState,
       readingOXState, setReadingOXState,
+      variationState, setVariationState,
     }}>
       {children}
     </AppContext.Provider>

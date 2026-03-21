@@ -1,4 +1,4 @@
-import { Settings, FileText, CheckSquare, Layers, BookOpenCheck } from 'lucide-react';
+import { Settings, FileText, CheckSquare, Layers, BookOpenCheck, RefreshCcw } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useState } from 'react';
 import ApiKeyModal from './ApiKeyModal';
@@ -9,6 +9,7 @@ const navItems = [
   { name: '빈칸 매칭 (문장생성)', path: '/', icon: CheckSquare, desc: 'AI 예문 자동 생성형' },
   { name: '영영풀이 (지문기반)', path: '/passage', icon: FileText, desc: '입력된 지문 기반' },
   { name: 'Reading 일치/불일치', path: '/reading-ox', icon: BookOpenCheck, desc: '지문 → O/X 문제 생성' },
+  { name: '다풀백 지문 변형', path: '/variation', icon: RefreshCcw, desc: '문제 원본 유지, 지문만 변형' },
 ];
 
 export default function Sidebar() {

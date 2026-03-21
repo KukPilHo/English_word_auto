@@ -4,6 +4,7 @@ import TypeB_Blank from './pages/TypeB_Blank';
 import TypeA_Passage from './pages/TypeA_Passage';
 import CumulativeTest from './pages/CumulativeTest';
 import ReadingOX from './pages/ReadingOX';
+import PassageVariation from './pages/PassageVariation';
 import { SettingsProvider } from './store/SettingsContext';
 import { AppProvider } from './store/AppContext';
 
@@ -17,6 +18,7 @@ export default function App() {
             <Route path="/passage" element={<TypeA_Passage />} />
             <Route path="/reading-ox" element={<ReadingOX />} />
             <Route path="/cumulative" element={<CumulativeTest />} />
+            <Route path="/variation" element={<PassageVariation />} />
           </Routes>
         </Layout>
       </AppProvider>
