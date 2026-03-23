@@ -6,7 +6,7 @@
   "homepage": "https://KukPilHo.github.io/English_word_auto",
   "scripts": {
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
+    "deploy": "gh-pages -d dist --repo git@github.com:KukPilHo/English_word_auto.git",
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
