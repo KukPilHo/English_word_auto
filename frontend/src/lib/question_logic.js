@@ -26,7 +26,7 @@ const CHOICE_NUMS_5 = ['①', '②', '③', '④', '⑤'];
 
 /* ────────────────────────────────────────────────
    Type 1: 단어-영영풀이 직접 매칭 (로컬, AI 미사용)
-   - 단어 4개 + 영영풀이 4개, 4지선다
+   - 단어 4개 + 영영풀이 4개, 5지선다
    ──────────────────────────────────────────────── */
 
 export function generateType1Questions(words, count) {
@@ -70,26 +70,26 @@ export function generateType1Questions(words, count) {
       answerMap[LABELS_4[i]] = DEF_LABELS[defIdx];
     });
 
-    // 4지선다 생성 (정답 1개 + 오답 3개)
+    // 5지선다 생성 (정답 1개 + 오답 4개)
     const choices = [];
     const answerStr = LABELS_4.map(l => `${l}-${answerMap[l]}`).join(', ');
 
     // 정답을 랜덤 위치에 삽입
-    const answerPos = Math.floor(Math.random() * 4);
+    const answerPos = Math.floor(Math.random() * 5);
 
     // 오답 매핑 생성: DEF_LABELS의 순열 중 정답과 다른 것
-    const otherPerms = generateDistinctPermutations(DEF_LABELS, answerMap, LABELS_4, 3);
+    const otherPerms = generateDistinctPermutations(DEF_LABELS, answerMap, LABELS_4, 4);
 
-    for (let i = 0, wrongIdx = 0; i < 4; i++) {
+    for (let i = 0, wrongIdx = 0; i < 5; i++) {
       if (i === answerPos) {
         choices.push({
-          number: CHOICE_NUMS_4[i],
+          number: CHOICE_NUMS_5[i],
           mapping: { ...answerMap },
           isCorrect: true,
         });
       } else {
         choices.push({
-          number: CHOICE_NUMS_4[i],
+          number: CHOICE_NUMS_5[i],
           mapping: otherPerms[wrongIdx],
           isCorrect: false,
         });
@@ -105,7 +105,7 @@ export function generateType1Questions(words, count) {
       wordLabels,
       defLabels,
       choices,
-      answer: CHOICE_NUMS_4[answerPos],
+      answer: CHOICE_NUMS_5[answerPos],
     });
   }
 

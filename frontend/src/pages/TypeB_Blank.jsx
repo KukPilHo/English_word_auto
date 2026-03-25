@@ -227,7 +227,7 @@ function WordMatchingCard({ q }) {
       </div>
 
       {/* 선택지 */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
         {q.choices.map((c) => (
           <div key={c.number} className="text-sm font-medium text-slate-700 bg-slate-50 p-3 rounded-lg border border-slate-100">
             <span className="font-bold">{c.number}</span>{' '}

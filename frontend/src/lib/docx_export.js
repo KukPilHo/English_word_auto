@@ -62,7 +62,7 @@ function renderType1(q) {
   elements.push(createBoxedContent([wordRow, ...defParas]));
   elements.push(new Paragraph({ spacing: { after: 200 } }));
 
-  // 4지선다
+  // 5지선다
   q.choices.forEach(c => {
     const mappingText = q.wordLabels.map(wl => `${wl.label}-${c.mapping[wl.label]}`).join(', ');
     elements.push(new Paragraph({
