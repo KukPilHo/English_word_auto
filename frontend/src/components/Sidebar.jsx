@@ -20,8 +20,8 @@ export default function Sidebar() {
     <>
       <div className="w-72 h-screen border-r border-slate-200/60 bg-white flex flex-col shrink-0 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)] z-10 relative">
         <div className="p-6 border-b border-slate-100 flex flex-col items-center justify-center">
-          <div className="w-24 h-24 rounded-full border-[3px] border-[#223B82] flex items-center justify-center bg-white shadow-sm mb-4 relative overflow-hidden">
-             <div className="flex flex-col items-start justify-center pt-0.5">
+          <div className="w-24 h-24 shrink-0 rounded-full border-[3px] border-[#223B82] flex items-center justify-center bg-white shadow-sm mb-4 relative overflow-hidden">
+             <div className="flex flex-col items-start justify-center pt-0.5 whitespace-nowrap">
                 <span className="text-[#C01554] font-black text-[15px] leading-tight tracking-tight ml-0.5">Rachel's</span>
                 <span className="text-[#32B4CA] font-black text-[11px] leading-tight mt-0.5 ml-0.5">대치</span>
                 <span className="text-[#1A2576] font-black text-[20px] leading-none tracking-tighter mt-0.5">SUMMIT</span>
