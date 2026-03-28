@@ -208,7 +208,7 @@ function WordMatchingCard({ q }) {
       <h3 className="font-bold text-lg mb-4">{q.number}. {q.instruction}</h3>
 
       {/* 단어 행 */}
-      <div className="flex items-center gap-4 mb-4 p-4 bg-slate-50 rounded-xl border border-slate-200/60">
+      <div className="flex flex-wrap items-center gap-4 mb-4 p-4 bg-slate-50 rounded-xl border border-slate-200/60">
         {q.wordLabels.map((wl) => (
           <div key={wl.label} className="flex items-center gap-1.5">
             <span className="text-sm font-bold text-slate-500">{wl.label}</span>

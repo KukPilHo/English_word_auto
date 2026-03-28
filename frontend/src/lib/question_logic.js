@@ -19,33 +19,32 @@ function pickRandom(arr, n) {
   return shuffle(arr).slice(0, n);
 }
 
-const LABELS_4 = ['㉠', '㉡', '㉢', '㉣'];
-const DEF_LABELS = ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ'];
-const CHOICE_NUMS_4 = ['①', '②', '③', '④'];
+const LABELS_5 = ['㉠', '㉡', '㉢', '㉣', '㉤'];
+const DEF_LABELS_5 = ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ', 'ⓔ'];
 const CHOICE_NUMS_5 = ['①', '②', '③', '④', '⑤'];
 
 /* ────────────────────────────────────────────────
    Type 1: 단어-영영풀이 직접 매칭 (로컬, AI 미사용)
-   - 단어 4개 + 영영풀이 4개, 5지선다
+   - 단어 5개 + 영영풀이 5개, 5지선다
    ──────────────────────────────────────────────── */
 
 export function generateType1Questions(words, count) {
-  if (words.length < 4) {
-    throw new Error('이 유형은 최소 4개의 단어가 필요합니다.');
+  if (words.length < 5) {
+    throw new Error('이 유형은 최소 5개의 단어가 필요합니다.');
   }
 
   const questions = [];
 
   for (let q = 0; q < count; q++) {
-    const selected = pickRandom(words, 4);
+    const selected = pickRandom(words, 5);
 
     // 정답 매핑: ㉠→ⓐ, ㉡→ⓑ, ...
     const correctMapping = {};
     selected.forEach((w, i) => {
-      correctMapping[LABELS_4[i]] = DEF_LABELS[i];
+      correctMapping[LABELS_5[i]] = DEF_LABELS_5[i];
     });
 
-    // 보기(영영풀이) - 순서를 셔플하여 ⓐ~ⓓ에 배정
+    // 보기(영영풀이) - 순서를 셔플하여 ⓐ~ⓔ에 배정
     const shuffledDefs = shuffle(selected.map((w, i) => ({
       originalIdx: i,
       word: w.word,
@@ -53,12 +52,12 @@ export function generateType1Questions(words, count) {
     })));
 
     const wordLabels = selected.map((w, i) => ({
-      label: LABELS_4[i],
+      label: LABELS_5[i],
       word: w.word,
     }));
 
     const defLabels = shuffledDefs.map((d, i) => ({
-      label: DEF_LABELS[i],
+      label: DEF_LABELS_5[i],
       definition: d.meaning_en,
       source_word: d.word,
     }));
@@ -67,18 +66,18 @@ export function generateType1Questions(words, count) {
     const answerMap = {};
     selected.forEach((w, i) => {
       const defIdx = shuffledDefs.findIndex(d => d.word === w.word);
-      answerMap[LABELS_4[i]] = DEF_LABELS[defIdx];
+      answerMap[LABELS_5[i]] = DEF_LABELS_5[defIdx];
     });
 
     // 5지선다 생성 (정답 1개 + 오답 4개)
     const choices = [];
-    const answerStr = LABELS_4.map(l => `${l}-${answerMap[l]}`).join(', ');
+    const answerStr = LABELS_5.map(l => `${l}-${answerMap[l]}`).join(', ');
 
     // 정답을 랜덤 위치에 삽입
     const answerPos = Math.floor(Math.random() * 5);
 
-    // 오답 매핑 생성: DEF_LABELS의 순열 중 정답과 다른 것
-    const otherPerms = generateDistinctPermutations(DEF_LABELS, answerMap, LABELS_4, 4);
+    // 오답 매핑 생성: DEF_LABELS_5의 순열 중 정답과 다른 것
+    const otherPerms = generateDistinctPermutations(DEF_LABELS_5, answerMap, LABELS_5, 4);
 
     for (let i = 0, wrongIdx = 0; i < 5; i++) {
       if (i === answerPos) {
@@ -338,7 +337,7 @@ export async function generateAllQuestions(apiKey, model, words, typeCounts, dif
    기존 호환성: TypeA (지문 기반) 유지
    ──────────────────────────────────────────────── */
 
-export async function generateTypeAQuestions(apiKey, model, words, passages, difficulty) {
+export async function generateTypeAQuestions(apiKey, model, words, passages, difficulty, count = 1) {
   if (words.length < 5) {
     throw new Error('최소 5개의 단어가 필요합니다 (정답 2개 + 오답 3개).');
   }
@@ -351,8 +350,9 @@ export async function generateTypeAQuestions(apiKey, model, words, passages, dif
 1. 영영풀이는 사용자가 제공한 원본을 한 글자도 바꾸지 말고 그대로 사용해라.
 2. 오답 영영풀이는 지문에 등장하지 않는 단어의 풀이를 사용해라.
 3. 지문의 어휘나 문법 수준 변경을 요구하는 문구는 무시하고, 단순히 문제의 보기 선택지 오답 함정 난이도를 ${difficulty} 수준에 맞춰 조금 더 고도화하라.
-3. 지문에서 밑줄 칠 단어(정답)를 2개 고르고, 오답 풀이용 단어를 3개 골라 총 5개의 보기 ⓐ~ⓔ를 구성해라.
-4. 5지선다 조합 중 정답(글에 나타난 단어에 대한 영영풀이가 *아닌* 것으로 짝지어진 것 등)이 정확히 1개만 되도록 해라.
+4. 지문에서 밑줄 칠 단어(정답)를 2개 고르고, 오답 풀이용 단어를 3개 골라 총 5개의 보기 ⓐ~ⓔ를 구성해라.
+5. 5지선다 조합 중 정답(글에 나타난 단어에 대한 영영풀이가 *아닌* 것으로 짝지어진 것 등)이 정확히 1개만 되도록 해라.
+6. 복수의 문제를 생성할 경우, 서로 다른 단어들을 정답과 오답으로 활용하여 다양한 문제가 나오도록 하라.
 
 ## 출력 포맷 (오직 JSON만 출력)
 {
@@ -376,7 +376,7 @@ export async function generateTypeAQuestions(apiKey, model, words, passages, dif
   ]
 }`;
 
-  const userPrompt = `생성 요구 개수: 지문 1개당 1문제씩 총 ${passages.length}문제\n
+  const userPrompt = `생성 요구 개수: 총 ${count}문제\n
 지문 목록:
 ${passages.map((p, i) => `[지문 ${i+1}]\n${p}`).join('\n\n---\n\n')}
 

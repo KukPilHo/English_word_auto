@@ -16,18 +16,19 @@ export const DIFFICULTY_LEVELS = [
 
 const EXAMPLE_WORD_MATCHING = `5. 다음 중 단어와 영영풀이가 모두 올바르게 연결되어 있는 것은? [2.9점]
 
-  ㉠ slogan    ㉡ wild    ㉢ skin    ㉣ report
+  ㉠ slogan    ㉡ wild    ㉢ skin    ㉣ report    ㉤ exchange
 
   ⓐ natural conditions, where animals and plants are not taken care of by people
   ⓑ a short phrase that is easy to remember
   ⓒ a written or spoken account that gives information about something
   ⓓ the outer covering of a person's or animal's body
+  ⓔ to give something and receive something of the same kind in return
 
-  ① ㉠-ⓐ, ㉡-ⓑ, ㉢-ⓒ, ㉣-ⓓ
-  ② ㉠-ⓑ, ㉡-ⓐ, ㉢-ⓓ, ㉣-ⓒ  ← 정답
-  ③ ㉠-ⓑ, ㉡-ⓐ, ㉢-ⓒ, ㉣-ⓓ
-  ④ ㉠-ⓒ, ㉡-ⓓ, ㉢-ⓐ, ㉣-ⓑ
-  ⑤ ㉠-ⓓ, ㉡-ⓒ, ㉢-ⓑ, ㉣-ⓐ`;
+  ① ㉠-ⓐ, ㉡-ⓑ, ㉢-ⓒ, ㉣-ⓓ, ㉤-ⓔ
+  ② ㉠-ⓑ, ㉡-ⓐ, ㉢-ⓓ, ㉣-ⓒ, ㉤-ⓔ  ← 정답
+  ③ ㉠-ⓑ, ㉡-ⓐ, ㉢-ⓒ, ㉣-ⓓ, ㉤-ⓔ
+  ④ ㉠-ⓒ, ㉡-ⓓ, ㉢-ⓐ, ㉣-ⓑ, ㉤-ⓔ
+  ⑤ ㉠-ⓓ, ㉡-ⓒ, ㉢-ⓑ, ㉣-ⓐ, ㉤-ⓔ`;
 
 const EXAMPLE_BLANK_MATCHING = `23. 빈칸에 들어갈 단어의 영영 풀이를 <보기>에서 순서대로 바르게 짝지은 것은?
 
@@ -69,7 +70,7 @@ export const VOCAB_TYPES = [
     desc: '주어진 단어와 영영풀이를 올바르게 연결하는 문제 (AI 미사용, 즉시 생성)',
     defaultCount: 1,
     enabled: true,
-    minWords: 4,
+    minWords: 5,
     example: EXAMPLE_WORD_MATCHING,
     exampleImage: import.meta.env.BASE_URL + 'check/1.png',
   },

@@ -55,7 +55,7 @@ export default function TypeA_Passage() {
         setError('최소 1개 이상의 유형을 선택해주세요.');
         return;
       }
-      const generated = await generateTypeAQuestions(apiKey, model, parsedWords, passagesList, difficulty);
+      const generated = await generateTypeAQuestions(apiKey, model, parsedWords, passagesList, difficulty, totalCount);
       
       const numbered = generated.map((q, i) => ({ ...q, number: i + 1, type: 'TypeA' }));
       updateState({ questions: numbered });
