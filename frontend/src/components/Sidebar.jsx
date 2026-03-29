@@ -1,4 +1,4 @@
-import { Settings, FileText, CheckSquare, Layers, BookOpenCheck, RefreshCcw } from 'lucide-react';
+import { Settings, FileText, CheckSquare, Layers, BookOpenCheck, RefreshCcw, ExternalLink } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useState } from 'react';
 import ApiKeyModal from './ApiKeyModal';
@@ -31,7 +31,26 @@ export default function Sidebar() {
         </div>
 
         <div className="flex-1 overflow-y-auto py-8 px-4 space-y-2">
-          <div className="text-xs font-bold text-slate-400/80 uppercase tracking-widest mb-4 px-2">Generator Tools</div>
+          <a
+            href="https://kukpilho.github.io/CKE_2/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden hover:bg-slate-50 border border-transparent mb-6"
+          >
+            <div className="flex flex-col">
+              <div className="flex items-center gap-3 relative z-10 hover:cursor-pointer">
+                <div className="p-1.5 rounded-lg transition-colors bg-slate-100 text-slate-500 group-hover:bg-slate-200 group-hover:text-blue-600">
+                  <ExternalLink className="w-4 h-4" />
+                </div>
+                <span className="font-bold text-[15px] transition-colors text-slate-600 group-hover:text-slate-900">CKE 링크</span>
+              </div>
+              <span className="text-[13px] ml-[44px] mt-1 font-medium transition-colors cursor-pointer text-slate-400 group-hover:text-slate-500">
+                대치써밋 CKE 생성기
+              </span>
+            </div>
+          </a>
+
+          <div className="text-xs font-bold text-slate-400/80 uppercase tracking-widest mb-4 px-2 mt-4">Generator Tools</div>
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;

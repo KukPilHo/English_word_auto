@@ -5,7 +5,7 @@ import { useAppState } from '../store/AppContext';
 import { generateTypeAQuestions } from '../lib/question_logic';
 import { parseUnstructuredPassage } from '../lib/llm_api';
 import { exportToDocx } from '../lib/docx_export';
-import { Bot, FileDown, AlertCircle, RefreshCw, FileText, BarChart, UploadCloud, X, Sparkles } from 'lucide-react';
+import { Bot, FileDown, AlertCircle, RefreshCw, FileText, BarChart, UploadCloud, X, Sparkles, CheckCircle2 } from 'lucide-react';
 import QuestionTypeSelector from '../components/QuestionTypeSelector';
 import { PASSAGE_TYPES, DIFFICULTY_LEVELS } from '../lib/questionTypes';
 
@@ -25,6 +25,7 @@ export default function TypeA_Passage() {
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [isParsingPassage, setIsParsingPassage] = useState(false);
+  const [parseSuccessMsg, setParseSuccessMsg] = useState('');
   const [error, setError] = useState('');
   const { apiKey, model } = useSettings();
   const fileInputRef = useRef(null);
@@ -100,10 +101,14 @@ export default function TypeA_Passage() {
         return;
     }
     setError('');
+    setParseSuccessMsg('');
     setIsParsingPassage(true);
     try {
         const textRes = await parseUnstructuredPassage(apiKey, model, passagesText, passageImage);
         updateState({ passagesText: textRes, passageImage: null });
+        const count = textRes.split('---').map(p => p.trim()).filter(Boolean).length;
+        setParseSuccessMsg(`성공적으로 지문을 분석했습니다. (총 ${count}개의 지문 인식됨)`);
+        setTimeout(() => setParseSuccessMsg(''), 5000);
     } catch (err) {
         setError(err.message);
     } finally {
@@ -180,7 +185,15 @@ export default function TypeA_Passage() {
                 )}
             </div>
 
-            <div className="bg-slate-50/50 p-4 border-t border-slate-100 flex justify-end">
+            <div className="bg-slate-50/50 p-4 border-t border-slate-100 flex justify-between items-center">
+               <div className="flex-1">
+                 {parseSuccessMsg && (
+                   <span className="text-sm font-bold text-emerald-600 flex items-center gap-1.5 animate-in fade-in">
+                     <CheckCircle2 className="w-4 h-4" />
+                     {parseSuccessMsg}
+                   </span>
+                 )}
+               </div>
                <button 
                   onClick={handleParsePassage}
                   disabled={isParsingPassage || (!passagesText.trim() && !passageImage)}
