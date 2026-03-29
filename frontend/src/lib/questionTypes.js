@@ -6,11 +6,11 @@
 // --- 예시 텍스트 ---
 
 export const DIFFICULTY_LEVELS = [
-  { label: '중1 수준', value: '중1 수준 (목표 Lexile: 300~450L, 기초 어휘 및 단문 위주)' },
-  { label: '중2 수준', value: '중2 수준 (목표 Lexile: 500~700L, 복문 등장 및 어휘 확장)' },
-  { label: '중3 수준', value: '중3 수준 (목표 Lexile: 700~900L, 학술적 소재 도입)' },
-  { label: '고1 수준', value: '고1 수준 (목표 Lexile: 850~1050L, 학력평가 수준)' },
-  { label: '고2 수준', value: '고2 수준 (목표 Lexile: 950~1100L, 영어I 수준)' },
+  { label: '중1 수준', value: '중1 수준 (목표 Lexile: 200~350L, 완전 기초 어휘 및 아주 짧은 단문 위주)' },
+  { label: '중2 수준', value: '중2 수준 (목표 Lexile: 300~450L, 기초 어휘 및 단문 위주)' },
+  { label: '중3 수준', value: '중3 수준 (목표 Lexile: 500~700L, 복문 등장 및 어휘 확장)' },
+  { label: '고1 수준', value: '고1 수준 (목표 Lexile: 700~900L, 학술적 소재 도입)' },
+  { label: '고2 수준', value: '고2 수준 (목표 Lexile: 850~1050L, 학력평가 수준)' },
   { label: '고3 수준', value: '고3 수준 (목표 Lexile: 1000~1200L, 수능 평균 수준)' }
 ];
 

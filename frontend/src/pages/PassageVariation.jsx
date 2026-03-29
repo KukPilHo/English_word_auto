@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useSettings } from '../store/SettingsContext';
 import { useAppState } from '../store/AppContext';
-import { extractFromImage, generatePassageVariation } from '../lib/variation_logic';
+import { extractFromInputs, generatePassageVariation } from '../lib/variation_logic';
 import { exportToDocx } from '../lib/docx_export'; // Assuming this exists, might need custom implementation if structure differs
 import { Bot, FileDown, AlertCircle, RefreshCw, UploadCloud, X, ArrowRight } from 'lucide-react';
 import { DIFFICULTY_LEVELS } from '../lib/questionTypes';
@@ -9,7 +9,7 @@ import { DIFFICULTY_LEVELS } from '../lib/questionTypes';
 export default function PassageVariation() {
   const { variationState, setVariationState } = useAppState();
   const { 
-    sourceImage, extractedOriginal, extractedQuestion, extractedOptions, 
+    sourceImages, sourceText, extractedOriginal, extractedQuestion, extractedOptions, 
     transformedPassage, difficulty, isExtracting, isTransforming 
   } = variationState;
 
@@ -20,11 +20,18 @@ export default function PassageVariation() {
   const updateState = (updates) => setVariationState(prev => ({ ...prev, ...updates }));
 
   const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (event) => updateState({ sourceImage: event.target.result });
-        reader.readAsDataURL(file);
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) {
+        files.forEach(file => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (event) => setVariationState(prev => ({ 
+                    ...prev, 
+                    sourceImages: [...(prev.sourceImages || []), event.target.result] 
+                }));
+                reader.readAsDataURL(file);
+            }
+        });
     }
   };
 
@@ -36,15 +43,24 @@ export default function PassageVariation() {
             e.preventDefault();
             const blob = items[i].getAsFile();
             const reader = new FileReader();
-            reader.onload = (event) => updateState({ sourceImage: event.target.result });
+            reader.onload = (event) => setVariationState(prev => ({ 
+                ...prev, 
+                sourceImages: [...(prev.sourceImages || []), event.target.result] 
+            }));
             reader.readAsDataURL(blob);
-            break;
         }
     }
   };
 
+  const removeImage = (index) => {
+      setVariationState(prev => ({
+          ...prev,
+          sourceImages: prev.sourceImages.filter((_, i) => i !== index)
+      }));
+  };
+
   const onExtract = async () => {
-    if (!sourceImage) return;
+    if ((!sourceImages || sourceImages.length === 0) && (!sourceText || sourceText.trim() === '')) return;
     if (!apiKey) {
       setError('좌측 하단의 설정에서 API 키를 먼저 등록해주세요.');
       return;
@@ -52,7 +68,7 @@ export default function PassageVariation() {
     setError('');
     updateState({ isExtracting: true, extractedOriginal: '', extractedQuestion: '', extractedOptions: '', transformedPassage: '' });
     try {
-      const result = await extractFromImage(apiKey, sourceImage);
+      const result = await extractFromInputs(apiKey, sourceImages, sourceText);
       updateState({
         extractedOriginal: result.original_passage,
         extractedQuestion: result.question_text,
@@ -117,36 +133,42 @@ export default function PassageVariation() {
           
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden text-sm">
             <div className="bg-slate-50 border-b border-slate-100 flex justify-between items-center px-4 py-3">
-              <label className="font-bold text-slate-700">시험지 이미지 캡처/업로드 (Ctrl+V)</label>
+              <label className="font-bold text-slate-700">시험지 이미지 캡처/업로드 (Ctrl+V) 또는 텍스트 입력</label>
               <button 
                  onClick={() => fileInputRef.current?.click()}
                  className="text-xs flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-bold"
               >
                  <UploadCloud className="w-3.5 h-3.5 text-blue-500" /> 사진 선택
               </button>
-              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" multiple onChange={handleFileChange} />
             </div>
             
             <div className="relative p-4" tabIndex={0} onPaste={handlePaste}>
-                {sourceImage ? (
-                    <div className="w-full h-64 bg-slate-100 flex items-center justify-center relative rounded-xl overflow-hidden border border-slate-200">
-                       <img src={sourceImage} className="max-h-full max-w-full object-contain" alt="uploaded" />
-                       <button onClick={() => updateState({ sourceImage: null })} className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full hover:bg-red-500">
-                           <X className="w-4 h-4" />
-                       </button>
-                    </div>
-                ) : (
-                    <div className="w-full h-48 border-2 border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center text-slate-400 bg-slate-50/50">
-                        <UploadCloud className="w-8 h-8 mb-2 opacity-50" />
-                        <p>여기를 클릭하거나 이미지를 붙여넣으세요 (Ctrl+V).</p>
-                    </div>
+                {(sourceImages && sourceImages.length > 0) && (
+                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                         {sourceImages.map((img, idx) => (
+                             <div key={idx} className="relative aspect-auto min-h-[120px] max-h-[200px] bg-slate-100 flex items-center justify-center rounded-xl overflow-hidden border border-slate-200">
+                                 <img src={img} className="max-h-full max-w-full object-contain" alt="uploaded" />
+                                 <button onClick={() => removeImage(idx)} className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full hover:bg-red-500">
+                                     <X className="w-4 h-4" />
+                                 </button>
+                             </div>
+                         ))}
+                     </div>
                 )}
+                
+                <textarea
+                    className="w-full h-32 p-4 border border-slate-200 rounded-xl bg-slate-50/50 text-slate-700 text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-400 font-medium"
+                    placeholder="직접 텍스트를 붙여넣거나 입력하세요... (Ctrl+V로 이미지를 바로 붙여넣는 것도 가능합니다)"
+                    value={sourceText || ''}
+                    onChange={(e) => updateState({ sourceText: e.target.value })}
+                />
             </div>
 
             <div className="bg-slate-50 p-4 border-t border-slate-100 flex justify-end">
                <button 
                   onClick={onExtract}
-                  disabled={isExtracting || !sourceImage}
+                  disabled={isExtracting || ((!sourceImages || sourceImages.length === 0) && (!sourceText || sourceText.trim() === ''))}
                   className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-sm hover:bg-blue-700 disabled:opacity-50"
                >
                   {isExtracting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Bot className="w-4 h-4" />}
@@ -169,7 +191,7 @@ export default function PassageVariation() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold">2</div>
-                <h2 className="text-xl font-bold text-slate-800">지변 변형 및 결과 비교</h2>
+                <h2 className="text-xl font-bold text-slate-800">지문 변형 및 결과 비교</h2>
               </div>
               
               <div className="flex items-center gap-3">

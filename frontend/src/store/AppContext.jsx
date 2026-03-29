@@ -68,7 +68,8 @@ export function AppProvider({ children }) {
 
   // Variation State (다풀백 지문 변형)
   const [variationState, setVariationState] = useState({
-    sourceImage: null,
+    sourceImages: [],
+    sourceText: '',
     extractedOriginal: '',
     extractedQuestion: '',
     extractedOptions: '',
