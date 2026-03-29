@@ -517,7 +517,7 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
 **[이미지 추출(OCR) 시 강력한 주의사항]**
 1. **원문자/기호 완벽 인식**: ㉠, ㉡, ㉢, ⓐ, ⓑ, ⓒ, ①, ② 등 동그라미 기호나 (A), (a) 같은 괄호 기호를 절대 임의의 다른 이상한 기호(◎, ◉ 등)나 뭉뚱그린 기호로 대체하지 마세요. 보이는 그대로 정확한 유니코드 원문자로 변환해 표기하세요.
 2. **한국어 오탈자 문맥 교정**: 이미지 화질 문제로 '밑...긋...칰'처럼 깨져 보이는 한국어 발문 텍스트가 있다면, 문맥을 파악하여 반드시 올바른 한국어 단어('밑줄 친')로 완벽하게 교정해서 추출하세요. 절대 깨진 글자 그대로 출력하지 마세요.
-3. **줄바꿈(Enter) 가독성 유지**: 문제 번호가 바뀌거나 보기가 나누어지는 등 원본에서 줄바꿈이 있는 곳은 반드시 '\\n' 기호를 넣어 여러 줄이 한 줄로 뭉개지지 않도록 구분해 추출하세요.
+3. **줄바꿈(Enter) 가독성 유지**: 문제 번호가 바뀌거나 보기가 나누어지는 등 원본에서 줄바꿈이 있는 곳은 반드시 '\\\\n' 기호를 넣어 여러 줄이 한 줄로 뭉개지지 않도록 구분해 추출하세요.
 
 분리 파싱할 세 가지 요소:
 1. original_passage: 지문 내용 원문 전체 (박스 안의 글)
@@ -531,11 +531,15 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
   "options_text": "..."
 }`},{role:`user`,content:r}],a=await fetch(`https://api.openai.com/v1/chat/completions`,{method:`POST`,headers:{"Content-Type":`application/json`,Authorization:`Bearer ${e}`},body:JSON.stringify({model:`gpt-4o`,messages:i,response_format:{type:`json_object`}})});if(!a.ok){let e=await a.json();throw Error(e.error?.message||`이미지 추출 API 호출에 실패했습니다.`)}let o=await a.json(),s=JSON.parse(o.choices[0].message.content);return{original_passage:s.original_passage||``,question_text:s.question_text||``,options_text:s.options_text||``}}async function KD(e,t,n){if(!e)throw Error(`API Key가 설정되지 않았습니다.`);let r=`[Role]
 당신은 한국의 중·고등학교 내신 및 수능 영어 시험 출제에 능통한 '최고 수준의 영어 교육 전문가'이자 '지문 재창작(Content Replacement) 마스터'입니다.
-[Objective]
-사용자가 영어 문항(지문+문제+선지+보기) 정보를 제공하면, 스토리·소재·등장인물을 완전히 새롭게 창작하되, 다음을 100% 보존합니다:
-- 문제 발문의 구조, 정답 번호, 선지 구성, 보기(Box) 단어
-- 빈칸/밑줄이 위치한 문장의 문법 골격(Grammatical Skeleton)
-즉, "완전히 다른 이야기지만, 같은 문법 문제가 성립하는 지문"을 만드는 것이 목표입니다.
+
+[Objective — 매우 중요!]
+사용자가 영어 문항(지문+문제+선지/보기) 정보를 제공합니다.
+당신의 임무는 **오직 "지문(passage)" 부분만** 소재·등장인물·배경을 완전히 새롭게 변형하는 것입니다.
+
+⛔⛔⛔ 절대 규칙: 문제(question_text)와 보기/선지(options_text)는 원본 그대로 100% 보존해야 합니다.
+- 문제 발문의 텍스트를 절대 재작성하지 마세요.
+- 보기/선지의 텍스트를 절대 재작성하지 마세요.
+- 서술형 동기화가 필요한 경우에만, 문제/보기 안의 내용어(고유명사, 일반명사 등)를 변형된 지문에 맞게 최소한으로 교체하세요. 이 경우에도 문법 구조, 정답, 빈칸 위치는 절대 변경하지 마세요.
 
 [핵심 개념: 문법 골격(Grammatical Skeleton)이란?]
 빈칸·밑줄·서술형 출제 포인트가 되는 문법 구조 자체를 말합니다.
@@ -545,18 +549,19 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
 변형 OK: She had never tasted (a)______ a delicious cake before. (소재 변경, 구조 동일)
 
 [Strict Constraints (절대 규칙)]
-1. 문제 원형 보존: 발문 구조, 정답 번호, 1~5번 선지 구성, 보기(Box) 단어는 토씨 하나 틀리지 않고 동일 유지.
+1. ⛔ 문제/보기 원형 절대 보존 (Critical #1):
+   - 문제 발문(question_text)은 원본 텍스트를 한 글자도 바꾸지 않고 그대로 유지하세요.
+   - 보기/선지(options_text)도 원본 텍스트를 한 글자도 바꾸지 않고 그대로 유지하세요.
+   - 유일한 예외: 서술형 동기화가 필요한 경우, 문제/보기 안의 내용어만 최소한으로 교체 (아래 규칙 참고).
+
 2. 스토리 완전 교체 및 어휘 교체율 극대화: 등장인물, 배경, 사건, 소재를 완전히 교체하세요. 단순 고유명사 치환을 넘어, 원본과 겹치지 않는 새로운 어휘 사용 비율을 기존 대비 20% 이상 대폭 늘려 지문을 재창조해야 합니다.
+
 3. 기호/밑줄 완벽 보존 및 [의도적 오류 강제 유지] (가장 핵심적인 Critical!): 
 - 원본에서 ⓐ is occurred 처럼 의도적인 어법 오답(비문법적 표현)이 출제되었다면, 변형 지문의 동일 기호 위치에도 **"수동태 불가 동사의 수동태(예: is happened, is occurred)"나 "단복수 불일치" 등 중학생이 봐도 명백히 틀린 비문법적 황당한 오류**를 무조건 적용해야 합니다! 단순히 is changed 같은 올바른 문장을 써놓고 오답이라고 우기면 안 됩니다. 
 
-4. 서술형 조건 단어 제공 및 번역 동기화 (채점 시비 방지): 
-- 영작 문제 출제 시 정답에 필요한 모든 핵심 단어(동사, 명사 등)를 <조건>에 빠짐없이 나열하세요. 
-- ★★ 지문 속에 표시되는 **한글 번역 문장의 의미와 <조건>의 영단어 의미가 100% 완벽하게 일치해야 합니다.** (예: 조건에 live가 있는데 한글에는 '전통 음악'이라고 창작해 번역하면 절대 안 됩니다. 반드시 '라이브 음악/생음악'으로 직역하세요.)
 4. ⛔ 서술형 문제 동기화 규칙 (Sync Rule) — 매우 중요
 서술형 문제(21번, 22번 등)에서 지문의 (가), (나), (다) 등을 참조하는 빈칸 문장이 있는 경우, 해당 빈칸 문장의 내용어(명사, 형용사 등)도 변형된 지문에 맞춰 반드시 업데이트하세요. 단, 문법 구조와 정답은 동일하게 유지합니다.
 구체적 적용 방법:
-
 빈칸 문장 안의 고유명사·일반명사·형용사 등 내용어 → 새 지문의 (가)(나)(다)에 등장하는 단어로 교체
 빈칸 문장의 문법 구조·빈칸 위치·정답 → 원본과 100% 동일하게 유지
 
@@ -564,50 +569,43 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
 [원본]
 지문 (가): "The crow was very happy with his life."
 21번 빈칸: "The crow was very ㉠______ with his life."
-22번 원문: "I thought that I was the happiest bird."
-
 [변형 후]
 지문 (가): "The painter was very pleased with his life."
 21번 빈칸: "The painter was very ㉠______ with his life."  ← 'crow'→'painter'로 동기화
-22번 원문: "I thought that I was the happiest person."  ← 'bird'→'person'으로 동기화
-체크 방법: 서술형 문제의 빈칸 문장을 읽었을 때, 변형된 지문의 내용과 자연스럽게 연결되는지 확인하세요. "이 문장이 이 지문에서 나온 것이 맞는가?"라는 질문에 YES여야 합니다.
+체크 방법: 서술형 문제의 빈칸 문장을 읽었을 때, 변형된 지문의 내용과 자연스럽게 연결되는지 확인하세요.
+
 5. ⛔ 스포일러 절대 금지 (Anti-Spoiler Rule)
 <보기>(Box)에 제시된 단어, 선지의 정답 단어, 그리고 **그 파생어(동일 어근)**는 변형 지문에 절대 노출하지 마세요.
-(예: 보기에 'reflect'가 있으면 → 지문에 'reflection', 'reflects', 'reflective' 사용 금지. 'gaze at his image', 'stare at himself' 등으로 우회)
-(예: 보기에 'satisfy'가 있으면 → 지문에 'satisfied', 'satisfaction', 'satisfying' 사용 금지. 'content'도 의미가 너무 유사하므로 피하세요. 'pleased', 'cheerful', 'delighted' 등 의미적 거리가 있는 단어로 우회)
-
 스포일러 판단 기준:
-사용 금지: 보기/정답 단어의 어근이 같은 모든 단어 (예: satisfy → satisfied, satisfying, satisfaction)
-사용 주의: 보기/정답 단어의 직접적 동의어 (예: satisfy ↔ content). 학생이 "이 단어가 힌트네"라고 느낄 수 있는 단어는 피하세요.
-사용 가능: 의미적 거리가 충분한 유사어 (예: satisfy → pleased, cheerful, delighted, glad)
+사용 금지: 보기/정답 단어의 어근이 같은 모든 단어
+사용 주의: 보기/정답 단어의 직접적 동의어
+사용 가능: 의미적 거리가 충분한 유사어
 
 6. ⛔ 지문 언어 절대 규칙 (English Passage ONLY)
-변형된 지문(본문 텍스트)은 반드시 **순수 영어(English)**로만 작성해야 합니다. 절대 본문을 한국어로 번역하거나 한국어로 창작하지 마세요.
-(단, "다음 글을 읽고 물음에 답하시오." 같은 문제 발문이나 서술형 조건 등, 원래 원본에서 한국어로 제공된 문제 관련 텍스트는 그대로 한국어로 유지합니다.)
+변형된 지문(본문 텍스트)은 반드시 **순수 영어(English)**로만 작성해야 합니다.
 
 7. 철저한 난이도 및 분량 통제 (Vocabulary Level Control)
 현재 지정된 난이도: [${n}]
 - 원본의 분량(±10% 이내)을 유지하세요.
 - [경고] 중2~중3 수준을 지정받은 경우, 'fortnight', 'ensues' 등 어려운 단어는 절대 사용 금지입니다. 반드시 'two weeks', 'starts' 같이 가장 쉬운 중학교 기초 필수 어휘(CEFR A1~A2 수준)만 사용하세요.
 
-8. 빈칸 구조 중복 금지: (a)____ 와 같이 정답이 들어갈 빈칸을 유지할 때, 원래 빈칸의 정답이 되는 단어(예: such 등)를 빈칸 바로 앞뒤 지문에 실수로 노출하거나 중복해서 작성하지 않도록 각별히 주의하세요.
+8. 빈칸 구조 중복 금지: (a)____ 와 같이 정답이 들어갈 빈칸을 유지할 때, 원래 빈칸의 정답이 되는 단어를 빈칸 바로 앞뒤 지문에 실수로 노출하지 않도록 주의하세요.
 
-9. 문제 간 줄바꿈(가독성) 필수 유지: 각 문제(예: 21번, 22번, 23번 등)와 객관식 보기들 사이에는 반드시 명확한 줄바꿈('\\n\\n')을 넣어 문항들이 하나로 뭉개지지 않도록 하세요.
+9. ⛔ 객관식 정답 논리 엄격 검증: "일치하지 않는 것을 모두 고르시오" 등의 문제에서, 본문과 일치하지 않는 선지가 실제로 2개 이상 만들어졌다면, 해설에도 반드시 그 2개 이상의 번호를 모두 기재하세요.
 
-10. 정답 및 해설 생성: 변형된 문제에 대한 정확한 정답과, 학생이 이해하기 쉬운 상세한 해설을 작성하세요.
-
-11. ⛔ 객관식 정답 논리 엄격 검증: "일치하지 않는 것을 모두 고르시오" 등의 문제에서, 본문과 일치하지 않는 선지가 실제로 2개 이상 만들어졌다면, 해설지의 [정답] 란에도 반드시 그 2개 이상의 번호를 모두 기재하세요! 하나만 적어놓고 나머지를 누락하는 실수를 하지 마세요. 반대로 단일 정답 문제인데 복수 정답이 생기지 않도록 오답 선지는 지문과 완벽히 일치시켜야 합니다.
-
-[출력 형식]
-반드시 다음 JSON 형식으로 응답할 것 (thought_process를 거친 후 transformed_result를 출력):
+[출력 형식 — 반드시 이 구조의 JSON을 출력할 것]
 {
   "thought_process": {
-    "grammar_error_enforcement": "원본 어법 함정(예: is occurred)을 변형 지문에도 아주 치명적이고 명백하게 틀린 비문법적 형태(예: is happened)로 유지했는가? (AI가 임의로 happens 등 올바른 어법으로 교정하지 않았음을 증명)",
-    "writing_sync_check": "서술형 영작의 한글 해석과 영어 조건 단어들의 실제 의미가 이질감 없이 100% 매칭되고 핵심어(동사, 명사)가 누락되지 않았는가?",
-    "multiple_choice_answer_key_check": "일치/불일치 선지 분석: 틀린 선지가 몇 개인가? 해설지의 [정답] 란에 해당 선지 번호가 '모두' 기재되었는가?",
-    "vocabulary_level_check": "중등 수준(CEFR A1/A2)을 벗어나는 어려운 단어(예: ensues, fortnight, anticipate 등)를 완전히 배제하고 쉬운 단어로 교체했는가?"
+    "grammar_error_enforcement": "원본 어법 함정을 변형 지문에도 명백하게 틀린 비문법적 형태로 유지했는가?",
+    "writing_sync_check": "서술형 동기화: 내용어 교체가 필요한 곳을 정확히 교체했는가?",
+    "question_preservation_check": "문제 발문과 보기/선지를 원본 그대로 보존했는가? (서술형 동기화 내용어 교체 외에 변경사항이 없는가?)",
+    "vocabulary_level_check": "지정된 난이도에 맞는 어휘만 사용했는가?"
   },
-  "transformed_result": "■ 다음 글을 읽고, 물음에 답하시오.\\n\\n[새로운 변형 통지문텍스트]\\n\\n[동기화된 문제 및 보기 텍스트]\\n\\n---\\n🔍 변형 해설\\n새 스토리 요약:\\n고정된 문법 골격 목록:\\n스포일러 우회 단어:\\n동기화 적용 내역:\\n\\n---\\n💡 **[정답 및 해설]**\\n[각 문제별 정확한 정답과 상세한 해설을 반드시 작성, 최하단에 배치]"
+  "transformed_passage": "변형된 지문 본문만 여기에 작성 (문제/보기 텍스트 포함 금지)",
+  "synced_question_text": "원본 문제 텍스트를 그대로 복사. 서술형 동기화가 필요한 내용어만 최소 교체. 동기화 불필요 시 원본과 100% 동일하게 유지.",
+  "synced_options_text": "원본 보기/선지 텍스트를 그대로 복사. 서술형 동기화가 필요한 내용어만 최소 교체. 동기화 불필요 시 원본과 100% 동일하게 유지.",
+  "variation_notes": "🔍 변형 해설\\n새 스토리 요약:\\n고정된 문법 골격 목록:\\n스포일러 우회 단어:\\n동기화 적용 내역:",
+  "answer_explanation": "💡 [정답 및 해설]\\n각 문제별 정확한 정답과 상세한 해설"
 }`,i=`[원본 지문]
 ${t.original_passage}
 
@@ -615,25 +613,49 @@ ${t.original_passage}
 ${t.question_text}
 
 [원본 보기/선지]
-${t.options_text}`,a=[{role:`system`,content:r},{role:`user`,content:i}],o=await fetch(`https://api.openai.com/v1/chat/completions`,{method:`POST`,headers:{"Content-Type":`application/json`,Authorization:`Bearer ${e}`},body:JSON.stringify({model:`gpt-4o`,messages:a,response_format:{type:`json_object`}})});if(!o.ok){let e=await o.json();throw Error(e.error?.message||`지문 변형 API 1차 호출에 실패했습니다.`)}let s=(await o.json()).choices[0].message.content,c=[{role:`system`,content:`당신은 방금 생성된 영어 내신/수능 형 지문 변형 문제의 완벽성을 검증하고 종합 수정하는 '최종 감수자(Editor-in-Chief)'입니다.
-다음은 1차로 생성된 문제 세트입니다. 아래 5가지 체크리스트를 바탕으로 철저히 검증하고, 수정이 필요한 곳을 모두 수정한 "최종 JSON 결과"를 출력해주세요.
+${t.options_text}
+
+⚠️ 최종 확인: "transformed_passage"에는 변형된 지문만 출력하세요. "synced_question_text"와 "synced_options_text"는 원본 문제/보기를 그대로 복사하되, 서술형 동기화가 필요한 내용어만 최소한으로 교체하세요.`,a=[{role:`system`,content:r},{role:`user`,content:i}],o=await fetch(`https://api.openai.com/v1/chat/completions`,{method:`POST`,headers:{"Content-Type":`application/json`,Authorization:`Bearer ${e}`},body:JSON.stringify({model:`gpt-4o`,messages:a,response_format:{type:`json_object`}})});if(!o.ok){let e=await o.json();throw Error(e.error?.message||`지문 변형 API 1차 호출에 실패했습니다.`)}let s=(await o.json()).choices[0].message.content,c=[{role:`system`,content:`당신은 방금 생성된 영어 내신/수능 형 지문 변형 문제의 완벽성을 검증하고 종합 수정하는 '최종 감수자(Editor-in-Chief)'입니다.
+다음은 1차로 생성된 문제 세트입니다. 아래 체크리스트를 바탕으로 철저히 검증하고, 수정이 필요한 곳을 모두 수정한 "최종 JSON 결과"를 출력해주세요.
+
+[원본 문제 (반드시 이것과 대조할 것)]
+${t.question_text}
+
+[원본 보기/선지 (반드시 이것과 대조할 것)]
+${t.options_text}
 
 [체크리스트]
-1. 기호 불일치 검증 (가장 중요): 문제지 발문에 나타난 기호(예: ⓐ, ⓑ, (A), (a)____ 등)가 변형된 "지문 본문"에도 100% 동일한 기호로, 적절한 위치에 존재하는지 확인하세요. 기호가 누락되었거나 '④'처럼 다른 기호로 바뀌었다면 통일하세요.
-2. 서술형 조건 단어 및 한글 의미 일치 검증: 서술형 정답에 필요한 <조건> 영단어들이 모두 주어졌는지 확인하고, 특히 **지문 속 한글 해석과 <조건>의 영단어 의미(예: traditional vs live)가 엇나가지 않고 100% 완벽히 일치**하는지 대조하여 모순이 있다면 즉시 수정하세요.
-3. 어휘 난이도 [${n}] 심층 검증: 중등 수준에서 'fortnight' 같은 어려운 단어를 하나라도 썼다면 즉시 'two weeks' 등 가장 쉬운 기초 단어로 싹 다 교체하세요. 학생이 읽고 모를 단어는 남기면 안 됩니다.
-4. 의도적 문법 오류(함정) 명백성 보장 (매우 중요): 원본의 어법 오답 구간을 단순히 '올바른 문장(예: is changed, is made)'으로 써놓고 문법적으로 틀렸다고 우기는지 확인하세요. 만약 그렇다면 해당 부분을 'is happened'처럼 **누가 봐도 명백하게 비문법적으로 틀린 구문**으로 강제 파괴해서(의도적 트롤링) 다시 작성하세요! 절대 지문을 올바른 문법으로 두지 마세요.
-5. 객관식 일치/불일치 정답 누락 방지: "일치하지 않는 것을 (모두) 고르시오" 등의 문제에서, 지문과 맞지 않는 거짓 선지가 실질적으로 2개라면 해설지의 답변에도 2개 모두 기재되어 있는지 확인하세요. 하나만 적혀있다면 나머지 정답 번호도 해설지에 즉시 추가하세요.
-6. 가독성(줄바꿈) 검증: 여러 문제(예: 21번, 22번 등)와 다지선다 보기들이 한 줄로 뭉쳐있다면, 반드시 각 문항과 보기 사이에 줄바꿈('\\n')을 명확히 넣어 시각적으로 예쁘게 분리하세요.
+1. ⛔ 문제/보기 원본 보존 검증 (가장 중요!!!):
+   - synced_question_text가 원본 question_text와 동일한지 한 글자씩 대조하세요.
+   - synced_options_text가 원본 options_text와 동일한지 한 글자씩 대조하세요.
+   - 만약 원본과 다른 부분이 있다면, 그것이 서술형 동기화를 위한 내용어 교체인지 확인하세요.
+   - 서술형 동기화가 아닌 임의 변경이 있다면, 즉시 원본 텍스트로 복원하세요!
 
-[출력 형식]
-반드시 아래 JSON 형식으로만 응답할 것 (반드시 thought_process 작성 후 최종 결과 도출):
+2. 기호 불일치 검증: 문제지 발문에 나타난 기호(예: ⓐ, ⓑ, (A), (a)____ 등)가 변형된 "지문 본문"에도 100% 동일한 기호로, 적절한 위치에 존재하는지 확인하세요.
+
+3. 어휘 난이도 [${n}] 심층 검증: 중등 수준에서 'fortnight' 같은 어려운 단어를 하나라도 썼다면 즉시 'two weeks' 등 가장 쉬운 기초 단어로 교체하세요.
+
+4. 의도적 문법 오류(함정) 명백성 보장 (매우 중요): 원본의 어법 오답 구간을 단순히 올바른 문장으로 써놓고 문법적으로 틀렸다고 우기는지 확인하세요. 만약 그렇다면 해당 부분을 'is happened'처럼 누가 봐도 명백하게 비문법적으로 틀린 구문으로 다시 작성하세요.
+
+5. 객관식 일치/불일치 정답 누락 방지.
+
+6. 가독성(줄바꿈) 검증.
+
+[출력 형식 — 반드시 이 구조의 JSON을 출력할 것]
 {
   "thought_process": {
-    "grammar_error_enforcement": "원본 어법 함정(예: is occurred)을 변형 지문에서 'is happened' 처럼 명백하게 문법이 틀린 기형적 형태로 강제 파괴했는가? (절대 교정하지 말 것!)",
-    "writing_sync_check": "기존 1차 결과물의 서술형 조건 단어와 한글 해석 의미에 모순이 없어 완벽 보완했는가?",
-    "multiple_choice_answer_key_check": "객관식 복수 정답이 발생했다면, 해설지 [정답] 영역에 누락 없이 모든 정답 번호를 명시하였는가?",
-    "vocabulary_level_check": "중학생 기초(CEFR A1/A2) 수준을 위해 어려운 어휘를 모두 교체했는가?"
+    "question_preservation_check": "synced_question_text를 원본과 글자 단위로 대조한 결과: (차이점이 있으면 구체적으로 명시, 없으면 '완벽 일치')",
+    "options_preservation_check": "synced_options_text를 원본과 글자 단위로 대조한 결과: (차이점이 있으면 구체적으로 명시, 없으면 '완벽 일치')",
+    "grammar_error_enforcement": "원본 어법 함정을 변형 지문에서 명백하게 문법이 틀린 형태로 강제 파괴했는가?",
+    "vocabulary_level_check": "지정된 난이도에 맞는 어휘만 사용했는가?"
   },
-  "transformed_result": "■ 다음 글을 읽고, 물음에 답하시오.\\n\\n[최종 수정 완료된 지문 텍스트]\\n\\n[최종 수정 완료된 문제 텍스트]\\n\\n---\\n🔍 변형 해설\\n(수정 내용 요약 등)\\n\\n---\\n💡 **[정답 및 해설]**\\n(각 문제별 복수 정답이면 모두 적기, 해설 최하단)"
-}`},{role:`user`,content:`[1차 생성 결과물]\n${s}\n\n이 결과물을 위 체크리스트에 따라 완벽하게 수정한 최종본을 출력해주세요.`}],l=await fetch(`https://api.openai.com/v1/chat/completions`,{method:`POST`,headers:{"Content-Type":`application/json`,Authorization:`Bearer ${e}`},body:JSON.stringify({model:`gpt-4o`,messages:c,response_format:{type:`json_object`}})});if(!l.ok){let e=await l.json();throw Error(e.error?.message||`지문 변형 API 2차(검증) 호출에 실패했습니다.`)}let u=await l.json();return JSON.parse(u.choices[0].message.content).transformed_result||``}function qD(){let{variationState:e,setVariationState:t}=ta(),{sourceImages:n,sourceText:r,extractedOriginal:i,extractedQuestion:a,extractedOptions:o,transformedPassage:s,difficulty:c,isExtracting:l,isTransforming:u}=e,[d,f]=(0,T.useState)(``),{apiKey:p}=Ii(),m=(0,T.useRef)(null),h=e=>t(t=>({...t,...e})),g=e=>{let n=Array.from(e.target.files||[]);n.length>0&&n.forEach(e=>{if(e.type.startsWith(`image/`)){let n=new FileReader;n.onload=e=>t(t=>({...t,sourceImages:[...t.sourceImages||[],e.target.result]})),n.readAsDataURL(e)}})},_=e=>{let n=e.clipboardData?.items;if(n){for(let r=0;r<n.length;r++)if(n[r].type.indexOf(`image`)!==-1){e.preventDefault();let i=n[r].getAsFile(),a=new FileReader;a.onload=e=>t(t=>({...t,sourceImages:[...t.sourceImages||[],e.target.result]})),a.readAsDataURL(i)}}},v=e=>{t(t=>({...t,sourceImages:t.sourceImages.filter((t,n)=>n!==e)}))};return(0,Y.jsxs)(`div`,{className:`max-w-6xl mx-auto p-8 pb-32 animate-in fade-in duration-500`,children:[(0,Y.jsxs)(`div`,{className:`mb-8`,children:[(0,Y.jsx)(`h1`,{className:`text-3xl font-black text-slate-900 tracking-tight`,children:`다풀백 지문 변형`}),(0,Y.jsx)(`p`,{className:`text-slate-500 mt-2 font-medium`,children:`문제 형식은 그대로 유지하면서 지문의 소재, 인물, 배경 등을 완전히 새롭게 변형합니다.`})]}),(0,Y.jsxs)(`div`,{className:`space-y-8`,children:[(0,Y.jsxs)(`section`,{children:[(0,Y.jsxs)(`div`,{className:`flex items-center gap-3 mb-4`,children:[(0,Y.jsx)(`div`,{className:`w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-sm shadow-blue-600/30`,children:`1`}),(0,Y.jsx)(`h2`,{className:`text-xl font-bold text-slate-800`,children:`문제 이미지 업로드 및 인식`})]}),(0,Y.jsxs)(`div`,{className:`bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden text-sm`,children:[(0,Y.jsxs)(`div`,{className:`bg-slate-50 border-b border-slate-100 flex justify-between items-center px-4 py-3`,children:[(0,Y.jsx)(`label`,{className:`font-bold text-slate-700`,children:`시험지 이미지 캡처/업로드 (Ctrl+V) 또는 텍스트 입력`}),(0,Y.jsxs)(`button`,{onClick:()=>m.current?.click(),className:`text-xs flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-bold`,children:[(0,Y.jsx)(Un,{className:`w-3.5 h-3.5 text-blue-500`}),` 사진 선택`]}),(0,Y.jsx)(`input`,{type:`file`,ref:m,className:`hidden`,accept:`image/*`,multiple:!0,onChange:g})]}),(0,Y.jsxs)(`div`,{className:`relative p-4`,tabIndex:0,onPaste:_,children:[n&&n.length>0&&(0,Y.jsx)(`div`,{className:`grid grid-cols-2 md:grid-cols-4 gap-4 mb-4`,children:n.map((e,t)=>(0,Y.jsxs)(`div`,{className:`relative aspect-auto min-h-[120px] max-h-[200px] bg-slate-100 flex items-center justify-center rounded-xl overflow-hidden border border-slate-200`,children:[(0,Y.jsx)(`img`,{src:e,className:`max-h-full max-w-full object-contain`,alt:`uploaded`}),(0,Y.jsx)(`button`,{onClick:()=>v(t),className:`absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full hover:bg-red-500`,children:(0,Y.jsx)(ir,{className:`w-4 h-4`})})]},t))}),(0,Y.jsx)(`textarea`,{className:`w-full h-32 p-4 border border-slate-200 rounded-xl bg-slate-50/50 text-slate-700 text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-400 font-medium`,placeholder:`직접 텍스트를 붙여넣거나 입력하세요... (Ctrl+V로 이미지를 바로 붙여넣는 것도 가능합니다)`,value:r||``,onChange:e=>h({sourceText:e.target.value})})]}),(0,Y.jsx)(`div`,{className:`bg-slate-50 p-4 border-t border-slate-100 flex justify-end`,children:(0,Y.jsxs)(`button`,{onClick:async()=>{if(!((!n||n.length===0)&&(!r||r.trim()===``))){if(!p){f(`좌측 하단의 설정에서 API 키를 먼저 등록해주세요.`);return}f(``),h({isExtracting:!0,extractedOriginal:``,extractedQuestion:``,extractedOptions:``,transformedPassage:``});try{let e=await GD(p,n,r);h({extractedOriginal:e.original_passage,extractedQuestion:e.question_text,extractedOptions:e.options_text})}catch(e){f(e.message)}finally{h({isExtracting:!1})}}},disabled:l||(!n||n.length===0)&&(!r||r.trim()===``),className:`flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-sm hover:bg-blue-700 disabled:opacity-50`,children:[l?(0,Y.jsx)($n,{className:`w-4 h-4 animate-spin`}):(0,Y.jsx)(zn,{className:`w-4 h-4`}),l?`AI 문자 인식 중...`:`텍스트 추출 시작`]})})]})]}),d&&(0,Y.jsxs)(`div`,{className:`p-4 bg-red-50 text-red-700 rounded-xl flex items-center gap-3 border border-red-100`,children:[(0,Y.jsx)(Vn,{className:`w-5 h-5`}),(0,Y.jsx)(`span`,{className:`font-medium text-sm`,children:d})]}),(i||l)&&(0,Y.jsxs)(`section`,{className:`animate-in fade-in slide-in-from-bottom-4`,children:[(0,Y.jsxs)(`div`,{className:`flex items-center justify-between mb-4`,children:[(0,Y.jsxs)(`div`,{className:`flex items-center gap-3`,children:[(0,Y.jsx)(`div`,{className:`w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold`,children:`2`}),(0,Y.jsx)(`h2`,{className:`text-xl font-bold text-slate-800`,children:`지문 변형 및 결과 비교`})]}),(0,Y.jsxs)(`div`,{className:`flex items-center gap-3`,children:[(0,Y.jsx)(`select`,{className:`text-sm border border-slate-200 rounded-lg px-3 py-2 outline-none font-medium`,value:c,onChange:e=>h({difficulty:e.target.value}),children:Gi.map(e=>(0,Y.jsx)(`option`,{value:e.value,children:e.label},e.label))}),(0,Y.jsxs)(`button`,{onClick:async()=>{if(i){if(!p){f(`좌측 하단의 설정에서 API 키를 먼저 등록해주세요.`);return}f(``),h({isTransforming:!0,transformedPassage:``});try{h({transformedPassage:await KD(p,{original_passage:i,question_text:a,options_text:o},c)})}catch(e){f(e.message)}finally{h({isTransforming:!1})}}},disabled:u||!i,className:`flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white font-bold rounded-xl shadow-sm hover:bg-indigo-700 disabled:opacity-50`,children:[u?(0,Y.jsx)($n,{className:`w-4 h-4 animate-spin`}):(0,Y.jsx)(JD,{className:`w-4 h-4`}),u?`새로운 지문 생성 중...`:`지문 변형하기`]})]})]}),(0,Y.jsxs)(`div`,{className:`grid grid-cols-1 md:grid-cols-2 gap-6`,children:[(0,Y.jsxs)(`div`,{className:`bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative`,children:[(0,Y.jsx)(`div`,{className:`absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-slate-100 text-slate-600 text-xs font-bold px-3 py-1 rounded-full border border-slate-200`,children:`원본 (Original)`}),l?(0,Y.jsx)(`div`,{className:`flex justify-center items-center h-full min-h-[300px]`,children:(0,Y.jsx)($n,{className:`w-8 h-8 text-blue-200 animate-spin`})}):(0,Y.jsxs)(`div`,{className:`space-y-4 pt-2`,children:[a&&(0,Y.jsx)(`p`,{className:`font-bold text-slate-800 whitespace-pre-wrap leading-relaxed`,children:a}),i&&(0,Y.jsx)(`div`,{className:`p-4 bg-slate-50 border border-slate-100 rounded-xl whitespace-pre-wrap font-serif text-slate-700 leading-relaxed text-sm`,children:i}),o&&(0,Y.jsx)(`p`,{className:`text-sm font-medium text-slate-600 whitespace-pre-wrap leading-relaxed px-2`,children:o})]})]}),(0,Y.jsxs)(`div`,{className:`bg-indigo-50/30 rounded-2xl p-5 border border-indigo-100 shadow-sm relative`,children:[(0,Y.jsxs)(`div`,{className:`absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full border border-indigo-200 flex items-center gap-1`,children:[(0,Y.jsx)(JD,{className:`w-3 h-3`}),` 변형 결과 (Variant)`]}),u?(0,Y.jsx)(`div`,{className:`flex justify-center items-center h-full min-h-[300px]`,children:(0,Y.jsx)($n,{className:`w-8 h-8 text-indigo-300 animate-spin`})}):s?(0,Y.jsxs)(`div`,{className:`space-y-4 pt-2 animate-in fade-in flex flex-col h-full`,children:[(0,Y.jsx)(`div`,{className:`p-4 bg-white border border-indigo-100 rounded-xl whitespace-pre-wrap font-serif text-slate-800 leading-relaxed text-[15px] shadow-sm flex-1 overflow-y-auto`,children:s}),(0,Y.jsx)(`div`,{className:`pt-4 flex justify-end`,children:(0,Y.jsxs)(`button`,{onClick:()=>{let e=s,t=new Blob([e],{type:`text/plain`}),n=URL.createObjectURL(t),r=document.createElement(`a`);r.href=n,r.download=`다풀백_지문변형_${new Date().getTime()}.txt`,r.click(),URL.revokeObjectURL(n)},className:`flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm font-bold rounded-lg hover:bg-slate-900`,children:[(0,Y.jsx)(Kn,{className:`w-4 h-4`}),` 변형 결과 다운로드 (.txt)`]})})]}):(0,Y.jsxs)(`div`,{className:`flex flex-col items-center justify-center h-full min-h-[300px] text-slate-400`,children:[(0,Y.jsx)(In,{className:`w-8 h-8 mb-2 opacity-30`}),(0,Y.jsx)(`p`,{className:`text-sm font-medium`,children:`변형하기 버튼을 누르면 이 곳에 생성됩니다.`})]})]})]})]})]})]})}function JD(e){return(0,Y.jsx)(`svg`,{fill:`currentColor`,viewBox:`0 0 24 24`,...e,children:(0,Y.jsx)(`path`,{d:`M12 2L14.26 8.74L21 11L14.26 13.26L12 20L9.74 13.26L3 11L9.74 8.74L12 2ZM6 3L6.87 5.13L9 6L6.87 6.87L6 9L5.13 6.87L3 6L5.13 5.13L6 3ZM18.5 15L19.37 17.13L21.5 18L19.37 18.87L18.5 21L17.63 18.87L15.5 18L17.63 17.13L18.5 15Z`})})}function YD(){return(0,Y.jsx)(Fi,{children:(0,Y.jsx)(ea,{children:(0,Y.jsx)(Bi,{children:(0,Y.jsxs)(bt,{children:[(0,Y.jsx)(vt,{path:`/`,element:(0,Y.jsx)(p_,{})}),(0,Y.jsx)(vt,{path:`/passage`,element:(0,Y.jsx)(b_,{})}),(0,Y.jsx)(vt,{path:`/reading-ox`,element:(0,Y.jsx)(UD,{})}),(0,Y.jsx)(vt,{path:`/cumulative`,element:(0,Y.jsx)(HD,{})}),(0,Y.jsx)(vt,{path:`/variation`,element:(0,Y.jsx)(qD,{})})]})})})})}(0,ar.createRoot)(document.getElementById(`root`)).render((0,Y.jsx)(T.StrictMode,{children:(0,Y.jsx)(sn,{children:(0,Y.jsx)(YD,{})})}));
+  "transformed_passage": "변형된 지문 본문만 (문제/보기 포함 금지)",
+  "synced_question_text": "원본 문제와 100% 동일 (서술형 동기화 내용어 교체만 허용)",
+  "synced_options_text": "원본 보기/선지와 100% 동일 (서술형 동기화 내용어 교체만 허용)",
+  "variation_notes": "🔍 변형 해설",
+  "answer_explanation": "💡 [정답 및 해설]"
+}`},{role:`user`,content:`[1차 생성 결과물]\n${s}\n\n이 결과물을 위 체크리스트에 따라 완벽하게 수정한 최종본을 출력해주세요.`}],l=await fetch(`https://api.openai.com/v1/chat/completions`,{method:`POST`,headers:{"Content-Type":`application/json`,Authorization:`Bearer ${e}`},body:JSON.stringify({model:`gpt-4o`,messages:c,response_format:{type:`json_object`}})});if(!l.ok){let e=await l.json();throw Error(e.error?.message||`지문 변형 API 2차(검증) 호출에 실패했습니다.`)}let u=await l.json(),d=JSON.parse(u.choices[0].message.content),f=d.transformed_passage||``,p=d.synced_question_text||t.question_text,m=d.synced_options_text||t.options_text,h=d.variation_notes||``,g=d.answer_explanation||``,_=[];return p&&_.push(p),f&&_.push(f),m&&_.push(m),h&&_.push(`---
+`+h),g&&_.push(`---
+`+g),_.join(`
+
+`)}function qD(){let{variationState:e,setVariationState:t}=ta(),{sourceImages:n,sourceText:r,extractedOriginal:i,extractedQuestion:a,extractedOptions:o,transformedPassage:s,difficulty:c,isExtracting:l,isTransforming:u}=e,[d,f]=(0,T.useState)(``),{apiKey:p}=Ii(),m=(0,T.useRef)(null),h=e=>t(t=>({...t,...e})),g=e=>{let n=Array.from(e.target.files||[]);n.length>0&&n.forEach(e=>{if(e.type.startsWith(`image/`)){let n=new FileReader;n.onload=e=>t(t=>({...t,sourceImages:[...t.sourceImages||[],e.target.result]})),n.readAsDataURL(e)}})},_=e=>{let n=e.clipboardData?.items;if(n){for(let r=0;r<n.length;r++)if(n[r].type.indexOf(`image`)!==-1){e.preventDefault();let i=n[r].getAsFile(),a=new FileReader;a.onload=e=>t(t=>({...t,sourceImages:[...t.sourceImages||[],e.target.result]})),a.readAsDataURL(i)}}},v=e=>{t(t=>({...t,sourceImages:t.sourceImages.filter((t,n)=>n!==e)}))};return(0,Y.jsxs)(`div`,{className:`max-w-6xl mx-auto p-8 pb-32 animate-in fade-in duration-500`,children:[(0,Y.jsxs)(`div`,{className:`mb-8`,children:[(0,Y.jsx)(`h1`,{className:`text-3xl font-black text-slate-900 tracking-tight`,children:`다풀백 지문 변형`}),(0,Y.jsx)(`p`,{className:`text-slate-500 mt-2 font-medium`,children:`문제 형식은 그대로 유지하면서 지문의 소재, 인물, 배경 등을 완전히 새롭게 변형합니다.`})]}),(0,Y.jsxs)(`div`,{className:`space-y-8`,children:[(0,Y.jsxs)(`section`,{children:[(0,Y.jsxs)(`div`,{className:`flex items-center gap-3 mb-4`,children:[(0,Y.jsx)(`div`,{className:`w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold shadow-sm shadow-blue-600/30`,children:`1`}),(0,Y.jsx)(`h2`,{className:`text-xl font-bold text-slate-800`,children:`문제 이미지 업로드 및 인식`})]}),(0,Y.jsxs)(`div`,{className:`bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden text-sm`,children:[(0,Y.jsxs)(`div`,{className:`bg-slate-50 border-b border-slate-100 flex justify-between items-center px-4 py-3`,children:[(0,Y.jsx)(`label`,{className:`font-bold text-slate-700`,children:`시험지 이미지 캡처/업로드 (Ctrl+V) 또는 텍스트 입력`}),(0,Y.jsxs)(`button`,{onClick:()=>m.current?.click(),className:`text-xs flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 font-bold`,children:[(0,Y.jsx)(Un,{className:`w-3.5 h-3.5 text-blue-500`}),` 사진 선택`]}),(0,Y.jsx)(`input`,{type:`file`,ref:m,className:`hidden`,accept:`image/*`,multiple:!0,onChange:g})]}),(0,Y.jsxs)(`div`,{className:`relative p-4`,tabIndex:0,onPaste:_,children:[n&&n.length>0&&(0,Y.jsx)(`div`,{className:`grid grid-cols-2 md:grid-cols-4 gap-4 mb-4`,children:n.map((e,t)=>(0,Y.jsxs)(`div`,{className:`relative aspect-auto min-h-[120px] max-h-[200px] bg-slate-100 flex items-center justify-center rounded-xl overflow-hidden border border-slate-200`,children:[(0,Y.jsx)(`img`,{src:e,className:`max-h-full max-w-full object-contain`,alt:`uploaded`}),(0,Y.jsx)(`button`,{onClick:()=>v(t),className:`absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-full hover:bg-red-500`,children:(0,Y.jsx)(ir,{className:`w-4 h-4`})})]},t))}),(0,Y.jsx)(`textarea`,{className:`w-full h-32 p-4 border border-slate-200 rounded-xl bg-slate-50/50 text-slate-700 text-[15px] focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all placeholder:text-slate-400 font-medium`,placeholder:`직접 텍스트를 붙여넣거나 입력하세요... (Ctrl+V로 이미지를 바로 붙여넣는 것도 가능합니다)`,value:r||``,onChange:e=>h({sourceText:e.target.value})})]}),(0,Y.jsx)(`div`,{className:`bg-slate-50 p-4 border-t border-slate-100 flex justify-end`,children:(0,Y.jsxs)(`button`,{onClick:async()=>{if(!((!n||n.length===0)&&(!r||r.trim()===``))){if(!p){f(`좌측 하단의 설정에서 API 키를 먼저 등록해주세요.`);return}f(``),h({isExtracting:!0,extractedOriginal:``,extractedQuestion:``,extractedOptions:``,transformedPassage:``});try{let e=await GD(p,n,r);h({extractedOriginal:e.original_passage,extractedQuestion:e.question_text,extractedOptions:e.options_text})}catch(e){f(e.message)}finally{h({isExtracting:!1})}}},disabled:l||(!n||n.length===0)&&(!r||r.trim()===``),className:`flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl shadow-sm hover:bg-blue-700 disabled:opacity-50`,children:[l?(0,Y.jsx)($n,{className:`w-4 h-4 animate-spin`}):(0,Y.jsx)(zn,{className:`w-4 h-4`}),l?`AI 문자 인식 중...`:`텍스트 추출 시작`]})})]})]}),d&&(0,Y.jsxs)(`div`,{className:`p-4 bg-red-50 text-red-700 rounded-xl flex items-center gap-3 border border-red-100`,children:[(0,Y.jsx)(Vn,{className:`w-5 h-5`}),(0,Y.jsx)(`span`,{className:`font-medium text-sm`,children:d})]}),(i||l)&&(0,Y.jsxs)(`section`,{className:`animate-in fade-in slide-in-from-bottom-4`,children:[(0,Y.jsxs)(`div`,{className:`flex items-center justify-between mb-4`,children:[(0,Y.jsxs)(`div`,{className:`flex items-center gap-3`,children:[(0,Y.jsx)(`div`,{className:`w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold`,children:`2`}),(0,Y.jsx)(`h2`,{className:`text-xl font-bold text-slate-800`,children:`지문 변형 및 결과 비교`})]}),(0,Y.jsxs)(`div`,{className:`flex items-center gap-3`,children:[(0,Y.jsx)(`select`,{className:`text-sm border border-slate-200 rounded-lg px-3 py-2 outline-none font-medium`,value:c,onChange:e=>h({difficulty:e.target.value}),children:Gi.map(e=>(0,Y.jsx)(`option`,{value:e.value,children:e.label},e.label))}),(0,Y.jsxs)(`button`,{onClick:async()=>{if(i){if(!p){f(`좌측 하단의 설정에서 API 키를 먼저 등록해주세요.`);return}f(``),h({isTransforming:!0,transformedPassage:``});try{h({transformedPassage:await KD(p,{original_passage:i,question_text:a,options_text:o},c)})}catch(e){f(e.message)}finally{h({isTransforming:!1})}}},disabled:u||!i,className:`flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white font-bold rounded-xl shadow-sm hover:bg-indigo-700 disabled:opacity-50`,children:[u?(0,Y.jsx)($n,{className:`w-4 h-4 animate-spin`}):(0,Y.jsx)(JD,{className:`w-4 h-4`}),u?`새로운 지문 생성 중...`:`지문 변형하기`]})]})]}),(0,Y.jsxs)(`div`,{className:`grid grid-cols-1 md:grid-cols-2 gap-6`,children:[(0,Y.jsxs)(`div`,{className:`bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative`,children:[(0,Y.jsx)(`div`,{className:`absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-slate-100 text-slate-600 text-xs font-bold px-3 py-1 rounded-full border border-slate-200`,children:`원본 (Original)`}),l?(0,Y.jsx)(`div`,{className:`flex justify-center items-center h-full min-h-[300px]`,children:(0,Y.jsx)($n,{className:`w-8 h-8 text-blue-200 animate-spin`})}):(0,Y.jsxs)(`div`,{className:`space-y-4 pt-2`,children:[a&&(0,Y.jsx)(`p`,{className:`font-bold text-slate-800 whitespace-pre-wrap leading-relaxed`,children:a}),i&&(0,Y.jsx)(`div`,{className:`p-4 bg-slate-50 border border-slate-100 rounded-xl whitespace-pre-wrap font-serif text-slate-700 leading-relaxed text-sm`,children:i}),o&&(0,Y.jsx)(`p`,{className:`text-sm font-medium text-slate-600 whitespace-pre-wrap leading-relaxed px-2`,children:o})]})]}),(0,Y.jsxs)(`div`,{className:`bg-indigo-50/30 rounded-2xl p-5 border border-indigo-100 shadow-sm relative`,children:[(0,Y.jsxs)(`div`,{className:`absolute top-0 right-1/2 translate-x-1/2 -translate-y-1/2 bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full border border-indigo-200 flex items-center gap-1`,children:[(0,Y.jsx)(JD,{className:`w-3 h-3`}),` 변형 결과 (Variant)`]}),u?(0,Y.jsx)(`div`,{className:`flex justify-center items-center h-full min-h-[300px]`,children:(0,Y.jsx)($n,{className:`w-8 h-8 text-indigo-300 animate-spin`})}):s?(0,Y.jsxs)(`div`,{className:`space-y-4 pt-2 animate-in fade-in flex flex-col h-full`,children:[(0,Y.jsx)(`div`,{className:`p-4 bg-white border border-indigo-100 rounded-xl whitespace-pre-wrap font-serif text-slate-800 leading-relaxed text-[15px] shadow-sm flex-1 overflow-y-auto`,children:s}),(0,Y.jsx)(`div`,{className:`pt-4 flex justify-end`,children:(0,Y.jsxs)(`button`,{onClick:()=>{let e=s,t=new Blob([e],{type:`text/plain`}),n=URL.createObjectURL(t),r=document.createElement(`a`);r.href=n,r.download=`다풀백_지문변형_${new Date().getTime()}.txt`,r.click(),URL.revokeObjectURL(n)},className:`flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm font-bold rounded-lg hover:bg-slate-900`,children:[(0,Y.jsx)(Kn,{className:`w-4 h-4`}),` 변형 결과 다운로드 (.txt)`]})})]}):(0,Y.jsxs)(`div`,{className:`flex flex-col items-center justify-center h-full min-h-[300px] text-slate-400`,children:[(0,Y.jsx)(In,{className:`w-8 h-8 mb-2 opacity-30`}),(0,Y.jsx)(`p`,{className:`text-sm font-medium`,children:`변형하기 버튼을 누르면 이 곳에 생성됩니다.`})]})]})]})]})]})]})}function JD(e){return(0,Y.jsx)(`svg`,{fill:`currentColor`,viewBox:`0 0 24 24`,...e,children:(0,Y.jsx)(`path`,{d:`M12 2L14.26 8.74L21 11L14.26 13.26L12 20L9.74 13.26L3 11L9.74 8.74L12 2ZM6 3L6.87 5.13L9 6L6.87 6.87L6 9L5.13 6.87L3 6L5.13 5.13L6 3ZM18.5 15L19.37 17.13L21.5 18L19.37 18.87L18.5 21L17.63 18.87L15.5 18L17.63 17.13L18.5 15Z`})})}function YD(){return(0,Y.jsx)(Fi,{children:(0,Y.jsx)(ea,{children:(0,Y.jsx)(Bi,{children:(0,Y.jsxs)(bt,{children:[(0,Y.jsx)(vt,{path:`/`,element:(0,Y.jsx)(p_,{})}),(0,Y.jsx)(vt,{path:`/passage`,element:(0,Y.jsx)(b_,{})}),(0,Y.jsx)(vt,{path:`/reading-ox`,element:(0,Y.jsx)(UD,{})}),(0,Y.jsx)(vt,{path:`/cumulative`,element:(0,Y.jsx)(HD,{})}),(0,Y.jsx)(vt,{path:`/variation`,element:(0,Y.jsx)(qD,{})})]})})})})}(0,ar.createRoot)(document.getElementById(`root`)).render((0,Y.jsx)(T.StrictMode,{children:(0,Y.jsx)(sn,{children:(0,Y.jsx)(YD,{})})}));
