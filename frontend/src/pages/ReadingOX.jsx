@@ -5,6 +5,7 @@ import { generateReadingOXQuestions } from '../lib/question_logic';
 import { exportToDocx } from '../lib/docx_export';
 import { Bot, FileDown, AlertCircle, RefreshCw, BarChart, Loader2, BookOpen } from 'lucide-react';
 import { DIFFICULTY_LEVELS } from '../lib/questionTypes';
+import { useAutoSave } from '../hooks/useAutoSave';
 
 export default function ReadingOX() {
   const { readingOXState, setReadingOXState } = useAppState();
@@ -13,6 +14,7 @@ export default function ReadingOX() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
   const { apiKey, model } = useSettings();
+  const { saveToHistory } = useAutoSave('readingOX');
 
   const updateState = (updates) => setReadingOXState(prev => ({ ...prev, ...updates }));
 
@@ -34,6 +36,14 @@ export default function ReadingOX() {
       const generated = await generateReadingOXQuestions(apiKey, model, passageText, questionCount, difficulty);
       const numbered = generated.map((q, i) => ({ ...q, number: i + 1 }));
       updateState({ questions: numbered, generationProgress: null });
+
+      // 자동 저장
+      await saveToHistory(
+        { passageText },
+        { difficulty, questionCount },
+        { questions: numbered },
+        { questionCount: numbered.length }
+      );
     } catch (e) {
       setError(e.message || '문제 생성에 실패했습니다.');
       updateState({ generationProgress: null });

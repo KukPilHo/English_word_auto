@@ -5,6 +5,7 @@ import { extractFromInputs, generatePassageVariation } from '../lib/variation_lo
 import { exportToDocx } from '../lib/docx_export'; // Assuming this exists, might need custom implementation if structure differs
 import { Bot, FileDown, AlertCircle, RefreshCw, UploadCloud, X, ArrowRight } from 'lucide-react';
 import { DIFFICULTY_LEVELS } from '../lib/questionTypes';
+import { useAutoSave } from '../hooks/useAutoSave';
 
 export default function PassageVariation() {
   const { variationState, setVariationState } = useAppState();
@@ -15,6 +16,7 @@ export default function PassageVariation() {
 
   const [error, setError] = useState('');
   const { apiKey } = useSettings();
+  const { saveToHistory } = useAutoSave('variation');
   const fileInputRef = useRef(null);
 
   const updateState = (updates) => setVariationState(prev => ({ ...prev, ...updates }));
@@ -97,6 +99,19 @@ export default function PassageVariation() {
       };
       const resultText = await generatePassageVariation(apiKey, extractedData, difficulty);
       updateState({ transformedPassage: resultText });
+
+      // 자동 저장
+      await saveToHistory(
+        { sourceImages, sourceText },
+        { difficulty },
+        {
+          extractedOriginal: extractedOriginal,
+          extractedQuestion: extractedQuestion,
+          extractedOptions: extractedOptions,
+          transformedPassage: resultText,
+        },
+        { difficulty }
+      );
     } catch (err) {
       setError(err.message);
     } finally {

@@ -7,20 +7,23 @@ import ReadingOX from './pages/ReadingOX';
 import PassageVariation from './pages/PassageVariation';
 import { SettingsProvider } from './store/SettingsContext';
 import { AppProvider } from './store/AppContext';
+import { HistoryProvider } from './store/HistoryContext';
 
 export default function App() {
   return (
     <SettingsProvider>
       <AppProvider>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<TypeB_Blank />} />
-            <Route path="/passage" element={<TypeA_Passage />} />
-            <Route path="/reading-ox" element={<ReadingOX />} />
-            <Route path="/cumulative" element={<CumulativeTest />} />
-            <Route path="/variation" element={<PassageVariation />} />
-          </Routes>
-        </Layout>
+        <HistoryProvider>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<TypeB_Blank />} />
+              <Route path="/passage" element={<TypeA_Passage />} />
+              <Route path="/reading-ox" element={<ReadingOX />} />
+              <Route path="/cumulative" element={<CumulativeTest />} />
+              <Route path="/variation" element={<PassageVariation />} />
+            </Routes>
+          </Layout>
+        </HistoryProvider>
       </AppProvider>
     </SettingsProvider>
   );

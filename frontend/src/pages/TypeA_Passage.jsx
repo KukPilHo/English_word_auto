@@ -8,6 +8,7 @@ import { exportToDocx } from '../lib/docx_export';
 import { Bot, FileDown, AlertCircle, RefreshCw, FileText, BarChart, UploadCloud, X, Sparkles, CheckCircle2 } from 'lucide-react';
 import QuestionTypeSelector from '../components/QuestionTypeSelector';
 import { PASSAGE_TYPES, DIFFICULTY_LEVELS } from '../lib/questionTypes';
+import { useAutoSave } from '../hooks/useAutoSave';
 
 const DEFAULT_PASSAGES = `[지문 1]
 Do you want to make healthy ramyeon? This is my recipe. First, boil water and put in
@@ -28,6 +29,7 @@ export default function TypeA_Passage() {
   const [parseSuccessMsg, setParseSuccessMsg] = useState('');
   const [error, setError] = useState('');
   const { apiKey, model } = useSettings();
+  const { saveToHistory } = useAutoSave('typeA');
   const fileInputRef = useRef(null);
 
   const updateState = (updates) => setTypeAState(prev => ({ ...prev, ...updates }));
@@ -60,6 +62,14 @@ export default function TypeA_Passage() {
       
       const numbered = generated.map((q, i) => ({ ...q, number: i + 1, type: 'TypeA' }));
       updateState({ questions: numbered });
+
+      // 자동 저장
+      await saveToHistory(
+        { rawText, parsedWords, passagesText, passageImage },
+        { difficulty, typeCounts },
+        { questions: numbered },
+        { wordCount: parsedWords.length, passageCount: passagesList.length, questionCount: numbered.length }
+      );
     } catch (e) {
       setError(e.message || '문제 생성에 실패했습니다.');
     } finally {

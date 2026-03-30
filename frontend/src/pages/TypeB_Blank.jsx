@@ -7,6 +7,7 @@ import { exportToDocx } from '../lib/docx_export';
 import { Bot, FileDown, AlertCircle, RefreshCw, BarChart, CheckCircle2, Loader2 } from 'lucide-react';
 import QuestionTypeSelector from '../components/QuestionTypeSelector';
 import { VOCAB_TYPES, getTypeById, DIFFICULTY_LEVELS } from '../lib/questionTypes';
+import { useAutoSave } from '../hooks/useAutoSave';
 
 export default function TypeB_Blank() {
   const { typeBState, setTypeBState } = useAppState();
@@ -15,6 +16,7 @@ export default function TypeB_Blank() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState('');
   const { apiKey, model } = useSettings();
+  const { saveToHistory } = useAutoSave('typeB');
 
   const updateState = (updates) => setTypeBState(prev => ({ ...prev, ...updates }));
 
@@ -53,6 +55,14 @@ export default function TypeB_Blank() {
         (progress) => updateState({ generationProgress: progress })
       );
       updateState({ questions: generated, generationProgress: null });
+
+      // 자동 저장
+      await saveToHistory(
+        { rawText, parsedWords },
+        { difficulty, typeCounts },
+        { questions: generated },
+        { wordCount: parsedWords.length, questionCount: generated.length }
+      );
     } catch (e) {
       setError(e.message || '문제 생성에 실패했습니다.');
       updateState({ generationProgress: null });

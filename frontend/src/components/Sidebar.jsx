@@ -3,6 +3,7 @@ import { cn } from '../lib/utils';
 import { useState } from 'react';
 import ApiKeyModal from './ApiKeyModal';
 import { Link, useLocation } from 'react-router-dom';
+import HistorySection from './HistorySection';
 
 const navItems = [
   { name: '누적 시험지', path: '/cumulative', icon: Layers, desc: '100% 브라우저 기반' },
@@ -30,9 +31,10 @@ export default function Sidebar() {
           <p className="text-[11px] font-bold text-slate-400 mt-2 uppercase tracking-widest text-center">영어 문제 자동 생성기</p>
         </div>
 
-        <div className="flex-1 overflow-y-auto py-8 px-4 space-y-2">
-          <a
-            href="https://kukpilho.github.io/CKE_2/"
+        <div className="flex-1 flex flex-col overflow-hidden py-6 px-4">
+          <div className="space-y-2 shrink-0 overflow-y-auto pb-2 scrollbar-thin">
+            <a
+              href="https://kukpilho.github.io/CKE_2/"
             target="_blank"
             rel="noopener noreferrer"
             className="block px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden hover:bg-slate-50 border border-transparent mb-6"
@@ -82,6 +84,13 @@ export default function Sidebar() {
               </Link>
             )
           })}
+
+          </div>
+
+          {/* History Section */}
+          <div className="mt-2 pt-4 border-t border-slate-100/60 flex-1 flex flex-col min-h-0">
+            <HistorySection />
+          </div>
         </div>
 
         <div className="p-5 border-t border-slate-100/60 bg-slate-50/50">
