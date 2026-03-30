@@ -21,16 +21,16 @@ export async function extractFromInputs(apiKey, imagesBase64Array, sourceText) {
   "options_text": "..."
 }`;
 
-  const defaultModel = 'gpt-4o';
-  
+  const defaultModel = 'gpt-5.2';
+
   const userContent = [
     { type: "text", text: "다음 제공된 이미지 및/또는 직접 입력된 텍스트에서 지문, 문제, 보기를 정확히 추출해줘. 텍스트가 명시적으로 제공되었다면 그 텍스트를 최우선으로 참고해." }
   ];
-  
+
   if (sourceText && sourceText.trim() !== '') {
     userContent.push({ type: "text", text: `[직접 입력된 텍스트]\n${sourceText}` });
   }
-  
+
   if (imagesBase64Array && imagesBase64Array.length > 0) {
     imagesBase64Array.forEach(img => {
       userContent.push({ type: "image_url", image_url: { url: img } });
@@ -168,7 +168,7 @@ ${extractedData.options_text}
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'gpt-5.4',
       messages: messages,
       response_format: { type: "json_object" }
     })
@@ -233,7 +233,7 @@ ${extractedData.options_text}
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: 'gpt-5.4',
       messages: verificationMessages,
       response_format: { type: "json_object" }
     })

@@ -36,8 +36,8 @@ export async function generateContent(apiKey, model, systemPrompt, userPrompt) {
 
 export async function parseUnstructuredWords(apiKey, model, text, imageBase64) {
   if (!apiKey) throw new Error("API Key가 설정되지 않았습니다. 메인 화면 하단에서 설정해주세요.");
-  // Default to gpt-4o for vision
-  const useModel = imageBase64 ? 'gpt-4o' : model;
+  // Default to gpt-5.2 for vision
+  const useModel = imageBase64 ? 'gpt-5.2' : model;
   const apiUrl = 'https://api.openai.com/v1/chat/completions';
 
   const systemPrompt = `너는 텍스트나 이미지에서 영어 단어와 영영풀이를 추출하는 전문가야.
@@ -84,7 +84,7 @@ export async function parseUnstructuredWords(apiKey, model, text, imageBase64) {
 
 export async function parseUnstructuredPassage(apiKey, model, text, imageBase64) {
   if (!apiKey) throw new Error("API Key가 설정되지 않았습니다.");
-  const useModel = imageBase64 ? 'gpt-4o' : model;
+  const useModel = imageBase64 ? 'gpt-5.2' : model;
   
   const systemPrompt = `너는 영어 지문 인식 전문가야. 주어진 텍스트나 이미지에서 순수하게 영어 지문 원문만 추출해줘. 한글 해설이나 문제 번호 등은 제외해.
 비어있다면 빈 문자열을 반환하고, 지문이 복수라면 '---' 문자로 구분해서 합쳐서 반환해.

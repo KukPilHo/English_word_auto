@@ -4,7 +4,7 @@ const SettingsContext = createContext(null);
 
 export function SettingsProvider({ children }) {
   const [apiKey, setApiKey] = useState(() => localStorage.getItem('openai_api_key') || '');
-  const [model, setModel] = useState('gpt-4o-mini'); // 고정 모델
+  const [model, setModel] = useState('gpt-5.4-mini'); // 고정 모델
 
   useEffect(() => {
     localStorage.setItem('openai_api_key', apiKey);
