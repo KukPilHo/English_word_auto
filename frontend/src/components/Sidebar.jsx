@@ -1,9 +1,8 @@
-import { Settings, FileText, CheckSquare, Layers, BookOpenCheck, RefreshCcw, ExternalLink } from 'lucide-react';
+import { Settings, FileText, CheckSquare, Layers, BookOpenCheck, RefreshCcw, ExternalLink, History } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useState } from 'react';
 import ApiKeyModal from './ApiKeyModal';
 import { Link, useLocation } from 'react-router-dom';
-import HistorySection from './HistorySection';
 
 const navItems = [
   { name: '누적 시험지', path: '/cumulative', icon: Layers, desc: '100% 브라우저 기반' },
@@ -11,6 +10,7 @@ const navItems = [
   { name: '영영풀이 (지문기반)', path: '/passage', icon: FileText, desc: '입력된 지문 기반' },
   { name: 'Reading 일치/불일치', path: '/reading-ox', icon: BookOpenCheck, desc: '지문 → O/X 문제 생성' },
   { name: '다풀백 지문 변형', path: '/variation', icon: RefreshCcw, desc: '문제 원본 유지, 지문만 변형' },
+  { name: '히스토리 관리', path: '/history', icon: History, desc: '생성된 문제 기록 확인' },
 ];
 
 export default function Sidebar() {
@@ -32,7 +32,7 @@ export default function Sidebar() {
         </div>
 
         <div className="flex-1 flex flex-col overflow-hidden py-6 px-4">
-          <div className="space-y-2 shrink-0 overflow-y-auto pb-2 scrollbar-thin">
+          <div className="space-y-2 flex-1 overflow-y-auto pb-2 scrollbar-thin">
             <a
               href="https://kukpilho.github.io/CKE_2/"
             target="_blank"
@@ -87,10 +87,7 @@ export default function Sidebar() {
 
           </div>
 
-          {/* History Section */}
-          <div className="mt-2 pt-4 border-t border-slate-100/60 flex-1 flex flex-col min-h-0">
-            <HistorySection />
-          </div>
+          {/* History Section Removed - Moved to independent page */}
         </div>
 
         <div className="p-5 border-t border-slate-100/60 bg-slate-50/50">

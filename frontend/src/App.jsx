@@ -8,6 +8,7 @@ import PassageVariation from './pages/PassageVariation';
 import { SettingsProvider } from './store/SettingsContext';
 import { AppProvider } from './store/AppContext';
 import { HistoryProvider } from './store/HistoryContext';
+import HistoryPage from './pages/HistoryPage';
 
 export default function App() {
   return (
@@ -21,6 +22,7 @@ export default function App() {
               <Route path="/reading-ox" element={<ReadingOX />} />
               <Route path="/cumulative" element={<CumulativeTest />} />
               <Route path="/variation" element={<PassageVariation />} />
+              <Route path="/history" element={<HistoryPage />} />
             </Routes>
           </Layout>
         </HistoryProvider>
