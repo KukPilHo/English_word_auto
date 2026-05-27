@@ -1,10 +1,11 @@
-import { Settings, FileText, CheckSquare, Layers, BookOpenCheck, RefreshCcw, ExternalLink, History } from 'lucide-react';
+import { Settings, FileText, CheckSquare, Layers, BookOpenCheck, RefreshCcw, ExternalLink, History, FileArchive } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useState } from 'react';
 import ApiKeyModal from './ApiKeyModal';
 import { Link, useLocation } from 'react-router-dom';
 
 const navItems = [
+  { name: '기출문제 은행', path: '/testbank', icon: FileArchive, desc: '문법별 기출문제 추출 및 인쇄' },
   { name: '누적 시험지', path: '/cumulative', icon: Layers, desc: '100% 브라우저 기반' },
   { name: '빈칸 매칭 (문장생성)', path: '/', icon: CheckSquare, desc: 'AI 예문 자동 생성형' },
   { name: '영영풀이 (지문기반)', path: '/passage', icon: FileText, desc: '입력된 지문 기반' },

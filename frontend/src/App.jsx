@@ -2,6 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import TypeB_Blank from './pages/TypeB_Blank';
 import TypeA_Passage from './pages/TypeA_Passage';
+import TestBank from './pages/TestBank';
 import CumulativeTest from './pages/CumulativeTest';
 import ReadingOX from './pages/ReadingOX';
 import PassageVariation from './pages/PassageVariation';
@@ -22,6 +23,7 @@ export default function App() {
               <Route path="/reading-ox" element={<ReadingOX />} />
               <Route path="/cumulative" element={<CumulativeTest />} />
               <Route path="/variation" element={<PassageVariation />} />
+              <Route path="/testbank" element={<TestBank />} />
               <Route path="/history" element={<HistoryPage />} />
             </Routes>
           </Layout>
