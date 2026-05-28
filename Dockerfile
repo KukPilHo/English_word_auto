@@ -44,6 +44,9 @@ COPY new_json ./new_json
 COPY static ./static
 COPY templates ./templates
 
+# Set environment variable for port
+ENV PORT=7860
+
 # Expose port 7860 (Hugging Face Spaces default port)
 EXPOSE 7860
 

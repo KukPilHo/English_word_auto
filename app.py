@@ -368,4 +368,7 @@ def download_file(filename):
 if __name__ == '__main__':
     load_questions_db()
     port = int(os.environ.get("PORT", 5001))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # Enable debug mode only for local development (port 5001) or if FLASK_DEBUG is explicitly 'true'
+    is_local = (port == 5001)
+    debug_mode = os.environ.get("FLASK_DEBUG", str(is_local).lower()).lower() == "true"
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)
