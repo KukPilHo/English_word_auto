@@ -1,0 +1,31 @@
+# 가상환경 폴더
+venv/
+
+# 파이썬 캐시 파일
+__pycache__/
+*.pyc
+
+# 사용자가 업로드한 파일
+uploads/
+
+# 프로그램이 생성한 결과 파일
+generated/
+
+# 환경 변수 (API 키 포함)
+.env
+
+# macOS 시스템 파일
+.DS_Store
+
+# 대용량 데이터베이스 폴더 (웹 브라우저로 직접 업로드 예정)
+DB/
+new_json/
+
+# 바이너리 이미지 및 문서 파일 일체 차단 (깃 LFS 검문 우회용)
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.pdf
+*.docx
