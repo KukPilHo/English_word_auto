@@ -1,7 +1,7 @@
 # ==========================================
 # Stage 1: Build the React (Vite) Frontend
 # ==========================================
-FROM node:18-alpine AS frontend-builder
+FROM node:20-alpine AS frontend-builder
 WORKDIR /app/frontend
 
 # Copy frontend dependency manifests
