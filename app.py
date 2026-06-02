@@ -6,9 +6,23 @@ import uuid
 import glob
 import json
 import word_processor
+import summit_ingest
+
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except Exception:
+    pass
 
 app = Flask(__name__, static_folder='frontend/dist', static_url_path='')
 CORS(app)
+
+# 추출/검토 라우트는 로컬(INGEST_MODE)에서만 등록. 운영(HF)엔 미노출.
+INGEST_ENABLED = os.environ.get("INGEST_MODE", "").lower() in ("1", "true", "yes")
+
+# 임시 관리자 모드 비밀코드. HF Spaces Secrets / EC2 환경변수에 ADMIN_CODE 설정.
+# (추후 구글 계정 화이트리스트 인증으로 교체 예정 — 그때 verify_admin만 갈아끼우면 됨)
+ADMIN_CODE = os.environ.get("ADMIN_CODE", "")
 
 UPLOAD_FOLDER = 'uploads'
 GENERATED_FOLDER = 'generated'
@@ -16,6 +30,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(GENERATED_FOLDER, exist_ok=True)
 
 QUESTIONS_DB = []
+# "기출문제(써밋용)" 신규 은행. 기존 QUESTIONS_DB(24k)와 완전 분리.
+SUMMIT_DB = []
 
 def match_category(grade, question_type, question_text, passage_text, explanation_text):
     # grade: "고1", "고2", "고3", "중1", "중2", "중3"
@@ -276,6 +292,108 @@ def load_questions_db():
     QUESTIONS_DB = questions_list
     print(f"[DB Loader] Loaded {len(QUESTIONS_DB)} grammar questions successfully.")
 
+def load_summit_db():
+    """summit_json/{학년}.json 들을 메모리 SUMMIT_DB로 적재(서빙용 정규화).
+
+    기존 load_questions_db()와 독립. 써밋용 3축(학년/문법유형/형식)만 사용한다.
+    """
+    global SUMMIT_DB
+    out = []
+    summit_dir = os.path.join(os.path.dirname(__file__), 'summit_json')
+    files = glob.glob(os.path.join(summit_dir, '*.json'))
+
+    for file_path in files:
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            items = data.get('questions', []) if isinstance(data, dict) else (data or [])
+            for item in items:
+                grade = item.get('grade', '')
+                sub = item.get('grammar_category', '99-1')
+                out.append({
+                    'id': item.get('id', ''),
+                    'categoryId': summit_ingest.build_category_id(grade, sub),
+                    'subType': item.get('question_type', '문장형'),
+                    'grade': grade,
+                    'grammarCategory': sub,
+                    'question': item.get('question', ''),
+                    'passage': item.get('passage', ''),
+                    'options': item.get('options', []) or [],
+                    'answer': item.get('answer', ''),
+                    'explanation': item.get('explanation', ''),
+                })
+        except Exception as e:
+            print(f"[Summit Loader] Error loading {file_path}: {e}")
+
+    SUMMIT_DB = out
+    print(f"[Summit Loader] Loaded {len(SUMMIT_DB)} summit questions.")
+
+
+@app.route('/api/summit/questions', methods=['GET'])
+def get_summit_questions():
+    # 카테고리 필터 (기존 /api/questions 와 동일한 prefix/subType 규칙)
+    category_ids = request.args.getlist('categories')
+    if not category_ids:
+        cats = request.args.get('categories', '')
+        if cats:
+            category_ids = cats.split(',')
+
+    # 형식 필터 (문장형/지문형/서술형)
+    types = request.args.getlist('type')
+    if not types:
+        t = request.args.get('type', '')
+        if t:
+            types = t.split(',')
+
+    filtered = SUMMIT_DB
+
+    if category_ids:
+        target_cats = []
+        target_subtypes = {}
+        for cid in category_ids:
+            if "__" in cid:
+                base, st = cid.split("__", 1)
+                target_cats.append(base)
+                target_subtypes[base] = st
+            else:
+                target_cats.append(cid)
+
+        def match_cat(q):
+            for tc in target_cats:
+                if q["categoryId"].startswith(tc):
+                    if tc in target_subtypes:
+                        return q["subType"] == target_subtypes[tc]
+                    return True
+            return False
+
+        filtered = [q for q in filtered if match_cat(q)]
+
+    if types:
+        filtered = [q for q in filtered if q["subType"] in types]
+
+    return jsonify(filtered)
+
+
+@app.route('/api/summit/categories', methods=['GET'])
+def get_summit_categories():
+    return jsonify(summit_ingest.categories_payload())
+
+
+@app.route('/api/config', methods=['GET'])
+def get_config():
+    # 프론트가 추출/검토 메뉴 노출 여부 판단용 (운영 빌드에선 ingest=false)
+    return jsonify({"ingest": INGEST_ENABLED})
+
+
+@app.route('/api/admin/verify', methods=['POST'])
+def verify_admin():
+    # URL 비밀코드(?admin=...) 검증. 코드는 서버 환경변수에만 존재하고 브라우저로 안 나간다.
+    data = request.get_json(silent=True) or {}
+    code = (data.get("code") or "").strip()
+    ok = bool(ADMIN_CODE) and code == ADMIN_CODE
+    return jsonify({"ok": ok})
+
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def catch_all(path):
@@ -365,8 +483,16 @@ def download_file(filename):
         download_name=safe_filename
     )
 
+if INGEST_ENABLED:
+    try:
+        import summit_ingest_api
+        summit_ingest_api.register(app, load_summit_db)
+    except Exception as e:
+        print(f"[Ingest] registration failed: {e}")
+
 if __name__ == '__main__':
     load_questions_db()
+    load_summit_db()
     port = int(os.environ.get("PORT", 5001))
     # Enable debug mode only for local development (port 5001) or if FLASK_DEBUG is explicitly 'true'
     is_local = (port == 5001)

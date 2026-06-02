@@ -6,3 +6,5 @@ gunicorn
 streamlit
 openai
 python-dotenv
+PyMuPDF
+pdfplumber

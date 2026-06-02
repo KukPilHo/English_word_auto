@@ -1,0 +1,66 @@
+{
+  "questions": [
+    {
+      "id": "smt-고3-0001",
+      "grade": "고3",
+      "grammar_category": "11-1",
+      "question_type": "지문형",
+      "question": "다음 글의 밑줄 친 ⓐ~ⓔ 중 어법상 어색한 것은?",
+      "passage": "Slice up a tomato and compare it with the human heart. You will see that they look similar. Researchers say the chemicals ⓐ<u>made</u> from tomatoes are good for your heart and blood. ⓑ<u>Eating</u> tomatoes can lower your risk of heart disease. Look at the shape of a walnut. It is very similar to the shape of the human brain. A walnut is divided into two parts, just like the brain. Walnuts also have wrinkles, ⓒ<u>which</u> the brain has too. Studies ⓓ<u>showing</u> that walnuts help our brains stay healthy. They are also good for ⓔ<u>preventing</u> Alzheimer's disease.",
+      "options": [
+        "① ⓐ",
+        "② ⓑ",
+        "③ ⓒ",
+        "④ ⓓ",
+        "⑤ ⓔ"
+      ],
+      "answer": "④",
+      "explanation": "ⓓ가 포함된 문장에는 본동사가 없으므로 분사 showing이 아니라 본동사 show가 와야 합니다. (Studies show that ~)"
+    },
+    {
+      "id": "smt-고3-0002",
+      "grade": "고3",
+      "grammar_category": "12-1",
+      "question_type": "문장형",
+      "question": "다음 밑줄 친 관계대명사의 쓰임이 어법상 옳은 것은?",
+      "passage": "",
+      "options": [
+        "① I have a friend who speaks five languages.",
+        "② This is the book what I bought.",
+        "③ He is the man which lives next door.",
+        "④ She met a boy whom can dance well.",
+        "⑤ I know a girl whose is very kind."
+      ],
+      "answer": "①",
+      "explanation": "선행사 a friend가 사람이고 관계절에서 주어 역할을 하므로 주격 관계대명사 who가 적절합니다. 나머지는 관계대명사 선택/격이 틀립니다."
+    },
+    {
+      "id": "smt-고3-0003",
+      "grade": "고3",
+      "grammar_category": "9-1",
+      "question_type": "서술형",
+      "question": "다음 우리말에 맞게 주어진 단어를 활용하여 문장을 완성하시오.",
+      "passage": "나의 목표는 의사가 되는 것이다.\nMy goal is _________________. (be, a doctor)",
+      "options": [],
+      "answer": "to be a doctor",
+      "explanation": "be동사의 보어 자리에 명사적 용법의 to부정사 'to be a doctor'를 씁니다."
+    },
+    {
+      "id": "smt-고3-0004",
+      "grade": "고3",
+      "grammar_category": "12-4",
+      "question_type": "지문형",
+      "question": "밑줄의 빈칸 친 (A)와 문장에서의 역할이 같은 것은? (3점)",
+      "passage": "No More Subtitles!\n\nWhat Works for You?\n\nThere are hundreds of good tips out there, but everyone has their own way of learning. Find <u>(A)what keeps you motivated</u>, and then you will enjoy learning more. Remember, every language is hard at first, but a new language can make your world much bigger!",
+      "options": [
+        "① I don't believe what you told me.",
+        "② Her honesty is what I like about her.",
+        "③ What surprised me was Paul's behavior.",
+        "④ This is what I ought from the market.",
+        "⑤ The situation is different from what we expected."
+      ],
+      "answer": "①",
+      "explanation": "(A) ‘what keeps you motivated’는 선행사를 포함한 관계대명사 what이 이끄는 명사절로, 동사 Find의 목적어 역할을 한다. ①의 ‘what you told me’도 believe의 목적어 역할을 하는 관계대명사 what 명사절이므로 역할이 같다."
+    }
+  ]
+}

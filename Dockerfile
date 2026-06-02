@@ -38,11 +38,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
 # Copy application files and folders
-COPY app.py word_processor.py ./
+COPY app.py word_processor.py summit_ingest.py summit_categories.json ./
 COPY DB ./DB
 COPY new_json ./new_json
+COPY summit_json ./summit_json
 COPY static ./static
 COPY templates ./templates
+# 주의: summit_pdf.py / summit_extract.py / summit_ingest_api.py 와 .env 는
+# 추출·검토(로컬 INGEST_MODE) 전용이므로 운영 이미지에 포함하지 않는다.
 
 # Set environment variable for port
 ENV PORT=7860

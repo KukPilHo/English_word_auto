@@ -21,7 +21,7 @@ export function HistoryProvider({ children }) {
     () => sessionStorage.getItem('activeSessionId') || null
   );
 
-  const { setTypeBState, setTypeAState, setReadingOXState, setVariationState } = useAppState();
+  const { setTypeBState, setTypeAState, setReadingOXState, setReadingMatchState, setVariationState } = useAppState();
   const navigate = useNavigate();
 
   // ── activeSessionId를 sessionStorage에 동기화 ──
@@ -107,6 +107,16 @@ export function HistoryProvider({ children }) {
           break;
         case 'readingOX':
           setReadingOXState(prev => ({
+            ...prev,
+            passageText: input.passageText || prev.passageText,
+            difficulty: settings.difficulty || prev.difficulty,
+            questionCount: settings.questionCount || prev.questionCount,
+            questions: result.questions || [],
+            generationProgress: null,
+          }));
+          break;
+        case 'readingMatch':
+          setReadingMatchState(prev => ({
             ...prev,
             passageText: input.passageText || prev.passageText,
             difficulty: settings.difficulty || prev.difficulty,

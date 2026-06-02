@@ -1,22 +1,41 @@
-import { Settings, FileText, CheckSquare, Layers, BookOpenCheck, RefreshCcw, ExternalLink, History, FileArchive } from 'lucide-react';
+import { Settings, FileText, CheckSquare, Layers, BookOpenCheck, RefreshCcw, ExternalLink, History, FileArchive, Stamp, ScanLine, Link2, ShieldCheck, LogOut } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ApiKeyModal from './ApiKeyModal';
+import { useAdmin } from '../store/AdminContext';
 import { Link, useLocation } from 'react-router-dom';
 
+// 관리자 전용으로 숨기려면 해당 항목에 adminOnly: true 한 줄만 추가하면 됨.
+// (관리자 모드는 URL ?admin=<코드> 로 진입 — store/AdminContext.jsx)
 const navItems = [
   { name: '기출문제 은행', path: '/testbank', icon: FileArchive, desc: '문법별 기출문제 추출 및 인쇄' },
+  { name: '기출문제 (써밋용)', path: '/summit-bank', icon: Stamp, desc: '정답 기준 문법 분류 · 신규 편성' },
   { name: '누적 시험지', path: '/cumulative', icon: Layers, desc: '100% 브라우저 기반' },
   { name: '빈칸 매칭 (문장생성)', path: '/', icon: CheckSquare, desc: 'AI 예문 자동 생성형' },
   { name: '영영풀이 (지문기반)', path: '/passage', icon: FileText, desc: '입력된 지문 기반' },
   { name: 'Reading 일치/불일치', path: '/reading-ox', icon: BookOpenCheck, desc: '지문 → O/X 문제 생성' },
+  { name: 'Reading 일치 짝짓기', path: '/reading-match', icon: Link2, desc: '지문 → 일치 진술 짝 고르기' },
   { name: '다풀백 지문 변형', path: '/variation', icon: RefreshCcw, desc: '문제 원본 유지, 지문만 변형' },
   { name: '히스토리 관리', path: '/history', icon: History, desc: '생성된 문제 기록 확인' },
 ];
 
 export default function Sidebar() {
   const [isModalOpen, setModalOpen] = useState(false);
+  const [ingestEnabled, setIngestEnabled] = useState(false);
   const location = useLocation();
+  const { isAdmin, exitAdmin } = useAdmin();
+
+  // 추출/검토 메뉴는 로컬(INGEST_MODE)에서만 노출 (운영 빌드 숨김)
+  useEffect(() => {
+    fetch('/api/config').then(r => r.json()).then(d => setIngestEnabled(!!d.ingest)).catch(() => {});
+  }, []);
+
+  const base = ingestEnabled
+    ? [...navItems, { name: '추출 · 검토 (로컬)', path: '/ingest', icon: ScanLine, desc: 'PDF → AI 추출 → 검토 확정' }]
+    : navItems;
+
+  // 관리자 전용(adminOnly) 항목은 관리자 모드일 때만 노출
+  const items = base.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <>
@@ -54,7 +73,7 @@ export default function Sidebar() {
           </a>
 
           <div className="text-xs font-bold text-slate-400/80 uppercase tracking-widest mb-4 px-2 mt-4">Generator Tools</div>
-          {navItems.map((item) => {
+          {items.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
             return (
@@ -91,8 +110,23 @@ export default function Sidebar() {
           {/* History Section Removed - Moved to independent page */}
         </div>
 
-        <div className="p-5 border-t border-slate-100/60 bg-slate-50/50">
-          <button 
+        <div className="p-5 border-t border-slate-100/60 bg-slate-50/50 space-y-3">
+          {isAdmin && (
+            <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200">
+              <span className="flex items-center gap-2 text-[13px] font-bold text-amber-700">
+                <ShieldCheck className="w-4 h-4" />
+                관리자 모드
+              </span>
+              <button
+                onClick={exitAdmin}
+                className="flex items-center gap-1 text-[12px] font-bold text-amber-600 hover:text-amber-800 transition-colors"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                종료
+              </button>
+            </div>
+          )}
+          <button
             onClick={() => setModalOpen(true)}
             className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-slate-600 rounded-xl bg-white shadow-sm border border-slate-200/60 hover:border-slate-300 hover:shadow-md hover:-translate-y-0.5 transition-all group"
           >

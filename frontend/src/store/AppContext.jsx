@@ -66,6 +66,15 @@ export function AppProvider({ children }) {
     generationProgress: null,
   });
 
+  // Reading 일치 짝짓기 State (지문 내용 일치 진술 짝 고르기)
+  const [readingMatchState, setReadingMatchState] = useState({
+    passageText: DEFAULT_READING_PASSAGE,
+    questions: [],
+    difficulty: DIFFICULTY_LEVELS[3].value,
+    questionCount: 1,
+    generationProgress: null,
+  });
+
   // Variation State (다풀백 지문 변형)
   const [variationState, setVariationState] = useState({
     sourceImages: [],
@@ -82,6 +91,7 @@ export function AppProvider({ children }) {
       typeBState, setTypeBState,
       typeAState, setTypeAState,
       readingOXState, setReadingOXState,
+      readingMatchState, setReadingMatchState,
       variationState, setVariationState,
     }}>
       {children}

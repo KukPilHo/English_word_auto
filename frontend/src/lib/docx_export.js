@@ -225,6 +225,47 @@ function renderReadingOX(q) {
 }
 
 /* ────────────────────────────────────
+   Reading 일치 짝짓기: 지문 내용 일치 진술 짝 고르기
+   ──────────────────────────────────── */
+
+function renderReadingMatch(q) {
+  const elements = [];
+
+  elements.push(createInstructionHeader(q.number, q.instruction));
+
+  // 지문 박스
+  const lines = (q.passage || '').split('\n');
+  const passageParas = lines.map(line => new Paragraph({
+    children: [new TextRun({ text: line, size: 22 })],
+    spacing: { after: 60 }
+  }));
+  elements.push(createBoxedContent(passageParas));
+  elements.push(new Paragraph({ spacing: { after: 200 } }));
+
+  // 7개 진술 (보기)
+  const header = new Paragraph({ children: [new TextRun({ text: "<보기>", size: 22 })], spacing: { after: 100 } });
+  const statementParas = (q.statements || []).map(s =>
+    new Paragraph({
+      children: [new TextRun({ text: `${s.label} ${s.text}`, size: 22 })],
+      spacing: { after: 80 }
+    })
+  );
+  elements.push(createBoxedContent([header, ...statementParas]));
+  elements.push(new Paragraph({ spacing: { after: 200 } }));
+
+  // 선택지 (짝)
+  (q.choices || []).forEach(c => {
+    elements.push(new Paragraph({
+      children: [new TextRun({ text: `${c.number} ${c.pair.join(', ')}`, size: 22 })],
+      spacing: { after: 80 }
+    }));
+  });
+  elements.push(new Paragraph({ spacing: { after: 400 } }));
+
+  return elements;
+}
+
+/* ────────────────────────────────────
    메인 내보내기 함수
    ──────────────────────────────────── */
 
@@ -244,6 +285,9 @@ export async function exportToDocx(questions, filename) {
         break;
       case 'reading_ox':
         docElements.push(...renderReadingOX(q));
+        break;
+      case 'reading_match':
+        docElements.push(...renderReadingMatch(q));
         break;
       default:
         // 기존 TypeA/TypeB 호환

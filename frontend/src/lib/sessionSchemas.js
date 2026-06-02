@@ -11,6 +11,7 @@ export const SESSION_TYPES = {
   TYPE_B: 'typeB',
   TYPE_A: 'typeA',
   READING_OX: 'readingOX',
+  READING_MATCH: 'readingMatch',
   VARIATION: 'variation',
 };
 
@@ -19,6 +20,7 @@ export const TYPE_LABELS = {
   typeB: '어휘문제',
   typeA: '지문기반',
   readingOX: '독해O/X',
+  readingMatch: '일치짝짓기',
   variation: '지문변형',
 };
 
@@ -27,6 +29,7 @@ export const TYPE_ROUTES = {
   typeB: '/',
   typeA: '/passage',
   readingOX: '/reading-ox',
+  readingMatch: '/reading-match',
   variation: '/variation',
 };
 
@@ -35,6 +38,7 @@ export const TYPE_COLORS = {
   typeB: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200' },
   typeA: { bg: 'bg-emerald-100', text: 'text-emerald-700', border: 'border-emerald-200' },
   readingOX: { bg: 'bg-violet-100', text: 'text-violet-700', border: 'border-violet-200' },
+  readingMatch: { bg: 'bg-rose-100', text: 'text-rose-700', border: 'border-rose-200' },
   variation: { bg: 'bg-orange-100', text: 'text-orange-700', border: 'border-orange-200' },
 };
 
@@ -43,6 +47,7 @@ export const TYPE_ICONS = {
   typeB: '📝',
   typeA: '📄',
   readingOX: '✏️',
+  readingMatch: '🔗',
   variation: '🔄',
 };
 
@@ -74,6 +79,7 @@ export function generateSessionTitle(type, metadata = {}) {
       ].filter(Boolean).join(', ');
       break;
     case SESSION_TYPES.READING_OX:
+    case SESSION_TYPES.READING_MATCH:
       summary = metadata.questionCount ? `문제 ${metadata.questionCount}개` : '';
       break;
     case SESSION_TYPES.VARIATION:
@@ -136,6 +142,7 @@ export function getSessionSummary(session) {
         metadata.passageCount ? `지문 ${metadata.passageCount}개` : null,
       ].filter(Boolean).join(', ') || '생성됨';
     case SESSION_TYPES.READING_OX:
+    case SESSION_TYPES.READING_MATCH:
       return metadata.questionCount ? `문제 ${metadata.questionCount}개` : '생성됨';
     case SESSION_TYPES.VARIATION:
       return metadata.difficulty ? getDifficultyLabel(metadata.difficulty) : '생성됨';

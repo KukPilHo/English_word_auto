@@ -449,3 +449,126 @@ ${passage}`;
   }));
   return questions;
 }
+
+/* ────────────────────────────────────────────────
+   Reading 일치 짝짓기: 지문 내용 일치 진술 짝 고르기
+   - 지문을 읽고 7개 진술(ⓐ~ⓖ) 중 "알 수 있는 것"끼리 짝지은 선택지를 고르는 5지선다
+   - AI는 7개 진술 + 정확히 2개 참(is_correct)만 생성하고,
+     선택지(짝) 조합과 정답은 JS에서 결정적으로 구성한다.
+   ──────────────────────────────────────────────── */
+
+const LABELS_7 = ['ⓐ', 'ⓑ', 'ⓒ', 'ⓓ', 'ⓔ', 'ⓕ', 'ⓖ'];
+
+/** 정확히 2개의 참 진술을 정답 짝으로, 나머지는 오답 짝으로 구성한 5지선다를 생성 */
+function buildMatchChoices(rawStatements, passage, number) {
+  // 라벨을 ⓐ~ⓖ 순서대로 강제 부여 (AI가 라벨을 잘못 달아도 무시)
+  const statements = (rawStatements || []).slice(0, 7).map((s, i) => ({
+    label: LABELS_7[i],
+    text: (s.text || '').trim(),
+    is_correct: !!s.is_correct,
+  }));
+
+  if (statements.length !== 7) {
+    throw new Error('AI가 7개의 보기 진술을 생성하지 못했습니다. 다시 시도해주세요.');
+  }
+
+  const correctLabels = statements.filter(s => s.is_correct).map(s => s.label);
+  if (correctLabels.length !== 2) {
+    throw new Error('AI가 정답 조건(지문으로 알 수 있는 진술 정확히 2개)을 충족하지 못했습니다. 다시 시도해주세요.');
+  }
+
+  const correctPair = [correctLabels[0], correctLabels[1]];
+  const pairKey = (p) => [...p].sort().join('');
+  const correctKey = pairKey(correctPair);
+
+  // 7개 라벨로 만들 수 있는 모든 짝(21개) 중, 정답 짝을 제외한 것이 모두 오답 짝
+  // (정답 짝이 아닌 짝은 반드시 거짓 진술을 1개 이상 포함하므로 안전한 오답이다)
+  const distractorPool = [];
+  for (let i = 0; i < LABELS_7.length; i++) {
+    for (let j = i + 1; j < LABELS_7.length; j++) {
+      const pair = [LABELS_7[i], LABELS_7[j]];
+      if (pairKey(pair) !== correctKey) distractorPool.push(pair);
+    }
+  }
+
+  const distractors = pickRandom(distractorPool, 4);
+
+  // 정답 짝 + 오답 4개를 섞어 ①~⑤에 배정
+  const mixed = shuffle([{ pair: correctPair, is_correct: true }, ...distractors.map(p => ({ pair: p, is_correct: false }))]);
+
+  const choices = mixed.map((c, i) => ({
+    number: CHOICE_NUMS_5[i],
+    pair: [...c.pair].sort((a, b) => LABELS_7.indexOf(a) - LABELS_7.indexOf(b)),
+    is_correct: c.is_correct,
+  }));
+
+  const answer = choices.find(c => c.is_correct).number;
+
+  return {
+    number,
+    typeId: 'reading_match',
+    type: 'ReadingMatch',
+    instruction: '<보기>의 ⓐ~ⓖ 중 윗글의 내용을 통해 알 수 있는 것끼리 짝지어진 것은?',
+    passage,
+    statements,
+    choices,
+    answer,
+  };
+}
+
+export async function generateReadingMatchQuestions(apiKey, model, passage, count, difficulty) {
+  if (!passage || passage.trim().length < 30) {
+    throw new Error('지문이 너무 짧습니다. 최소 30자 이상의 영어 지문을 입력해주세요.');
+  }
+
+  const systemPrompt = `너는 한국 중고등학교 영어 내신 시험 출제 전문가야.
+주어진 영어 지문을 바탕으로, "윗글의 내용을 통해 알 수 있는 것끼리 짝지어진 것"을 고르는 일치 짝짓기 문제를 출제해.
+목표 난이도는 [${difficulty}] 수준이다.
+
+## 문제 구조
+- <보기>에는 지문에 관한 7개의 영어 진술문이 들어간다. (라벨/번호는 시스템이 부여하므로 너는 순서대로 7개만 작성)
+- 이 중 정확히 2개만 지문의 내용을 통해 "알 수 있는(일치하는)" 참인 진술이어야 한다 → is_correct: true
+- 나머지 5개는 지문만으로는 "알 수 없거나 사실과 다른" 거짓 진술이어야 한다 → is_correct: false
+- 학생은 참인 진술 2개가 짝지어진 선택지를 정답으로 고르게 된다. (선택지 조합은 시스템이 만든다)
+
+## 진술문 작성 규칙 (핵심 — 반드시 지켜라)
+1. 모든 진술문은 영어로 쓰고, 지문 문장을 그대로 베끼지 말고 반드시 패러프레이즈하라.
+2. 참(is_correct: true) 진술 2개: 지문에 직접 언급되었거나 명백히 추론 가능한 내용. 단, 어휘·표현은 지문과 다르게 바꿔라.
+3. 거짓(is_correct: false) 진술 5개는 아래 함정 유형을 골고루 섞어라:
+   - 지문에 없는 정보를 덧붙임 (국적·연도·장소·인물 관계를 잘못 연결)
+   - 지문 내용을 과장/일반화 (most, all, always, the first, the only 등)
+   - 두 대상의 속성을 서로 뒤바꿈 (A의 특징을 B에 붙이기)
+   - 인과 관계나 시간 순서를 왜곡
+   - 지문에서 다룬 사실과 정반대로 진술
+4. 거짓 진술도 지문을 꼼꼼히 읽지 않은 학생은 헷갈릴 만큼 그럴듯해야 한다. (터무니없이 무관한 내용 금지)
+5. 7개 진술의 소재가 지문 전체에 고르게 분포하도록 하라. (특정 한 문단에만 쏠리지 말 것)
+6. 각 진술문은 빈칸 없는 완전한 평서문으로, 12~22단어 내외로 작성하라.
+7. 정답이 한쪽으로 쏠리지 않도록, 참인 2개 진술을 7개 중 매번 다른 위치에 배치하라.
+
+## 출력 포맷 (오직 JSON만 출력, 그 외 텍스트·코드블록 금지)
+- statements는 반드시 정확히 7개, 그 중 is_correct: true는 정확히 2개여야 한다.
+{
+  "questions": [
+    {
+      "statements": [
+        {"text": "Cubism started in Paris and lasted for less than twenty years.", "is_correct": true},
+        {"text": "Most of Rembrandt's paintings show outdoor landscape scenes.", "is_correct": false},
+        {"text": "Surrealist painters Salvador Dali and Joan Miro were both from Spain.", "is_correct": true},
+        {"text": "Impressionism was popular all over the world until the 1930s.", "is_correct": false},
+        {"text": "Post-Impressionist works share the same bright style as Impressionism.", "is_correct": false},
+        {"text": "Picasso painted a single subject from only one fixed angle.", "is_correct": false},
+        {"text": "Baroque art is described as plain and calm rather than dramatic.", "is_correct": false}
+      ]
+    }
+  ]
+}`;
+
+  const userPrompt = `생성 요구 개수: ${count}문제
+${count > 1 ? '\n⚠️ 여러 문제를 만들 경우, 문제마다 서로 다른 진술 소재와 다른 정답 조합이 나오도록 다양하게 구성하라.\n' : ''}
+영어 지문:
+${passage}`;
+
+  const res = await generateContent(apiKey, model, systemPrompt, userPrompt);
+  const questions = (res.questions || []).map((q, i) => buildMatchChoices(q.statements, passage, i + 1));
+  return questions;
+}
