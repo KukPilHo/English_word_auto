@@ -177,7 +177,7 @@ export default function SummitBank() {
                 </div>
               </div>
 
-              <div className="print:columns-2 print:gap-10">
+              <div className="print:grid print:grid-cols-2 print:gap-10 print:items-start">
                 {displayedQuestions.map((q, index) => (
                   <QuestionCard
                     key={q.id}

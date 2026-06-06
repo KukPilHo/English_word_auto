@@ -141,7 +141,7 @@ export default function TestBank() {
               </div>
 
               {/* 문제 렌더링 (A4 2단 레이아웃 - 인쇄 시) */}
-              <div className="print:columns-2 print:gap-10">
+              <div className="print:grid print:grid-cols-2 print:gap-10 print:items-start">
                 {displayedQuestions.map((q, index) => (
                   <QuestionCard
                     key={q.id}
