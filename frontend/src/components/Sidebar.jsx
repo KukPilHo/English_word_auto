@@ -39,7 +39,7 @@ export default function Sidebar() {
 
   return (
     <>
-      <div className="w-72 h-screen border-r border-slate-200/60 bg-white flex flex-col shrink-0 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)] z-10 relative">
+      <div className="w-72 h-screen border-r border-slate-200/60 bg-white flex flex-col shrink-0 shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)] z-10 relative print:hidden">
         <div className="p-6 border-b border-slate-100 flex flex-col items-center justify-center">
           <div className="w-24 h-24 shrink-0 rounded-full border-[3px] border-[#223B82] flex items-center justify-center bg-white shadow-sm mb-4 relative overflow-hidden">
              <div className="flex flex-col items-start justify-center pt-0.5 whitespace-nowrap">

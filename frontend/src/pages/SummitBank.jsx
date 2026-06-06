@@ -70,7 +70,7 @@ export default function SummitBank() {
   const handlePrint = () => window.print();
 
   return (
-    <div className="flex h-full bg-slate-50 relative">
+    <div className="flex h-full bg-slate-50 relative print:h-auto print:block">
       {/* 좌측 카테고리 패널 */}
       <div className="w-80 bg-white border-r border-slate-200 flex flex-col h-full print:hidden">
         <div className="p-4 border-b border-slate-200 bg-slate-50/50">
@@ -91,7 +91,7 @@ export default function SummitBank() {
       </div>
 
       {/* 우측 메인 */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-slate-100/50 print:bg-white">
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-slate-100/50 print:bg-white print:h-auto print:overflow-visible print:block">
         {/* 툴바 */}
         <div className="print:hidden bg-white border-b border-slate-200 px-6 py-3 flex items-center gap-4 flex-wrap">
           <div className="text-sm text-slate-600">
@@ -151,7 +151,7 @@ export default function SummitBank() {
         </div>
 
         {/* 문서 영역 */}
-        <div className="flex-1 overflow-y-auto p-8 print:p-0 print:overflow-visible flex justify-center">
+        <div className="flex-1 overflow-y-auto p-8 print:p-0 print:overflow-visible flex justify-center print:block print:h-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-full text-slate-500 print:hidden">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4"></div>
@@ -202,9 +202,6 @@ export default function SummitBank() {
 
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
-          body * { visibility: hidden; }
-          .print\\:hidden { display: none !important; }
-          main, main * { visibility: visible; }
           @page { size: A4; margin: 15mm; }
         }
       `}} />
